@@ -204,9 +204,8 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
 </div></footer>
 
 <script type="module">
+import { rp, pc, fees, solve, remapEntry, searchCategories } from "/js/shopee-calc.js";
 const $ = (id) => document.getElementById(id);
-const rp = (n) => (n < 0 ? "-Rp" : "Rp") + Math.round(Math.abs(n)).toLocaleString("id-ID");
-const pc = (n) => n.toLocaleString("id-ID", { maximumFractionDigits: 2 }) + "%";
 const raw = (id) => String($(id).value).trim();
 const val = (id) => parseFloat(raw(id).replace(/\./g, "").replace(",", ".")) || 0;
 const fmtMoney = (el) => { const n = parseInt(el.value.replace(/\D/g, ""), 10); el.value = isNaN(n) ? "" : n.toLocaleString("id-ID"); };
@@ -279,15 +278,7 @@ const mode = () => document.querySelector("[name=mode]:checked").value;
 const set = () => D.kategori[tipe() === "mall" ? "mall" : "reguler"];
 
 /* ---------- pilih kategori ---------- */
-const items = (s) => new Set(s.toLowerCase().split(/,\s*|;\s*/));
-function search(qs) {
-  const t = qs.toLowerCase().split(/\s+/).filter(Boolean);
-  if (!t.length) return [];
-  return set().map((e) => ({ e, h: `${e.k} ${e.s} ${e.j}`.toLowerCase(), n: `${e.k} ${e.s}`.toLowerCase() }))
-    .filter((x) => t.every((w) => x.h.includes(w)))
-    .sort((a, b) => t.filter((w) => b.n.includes(w)).length - t.filter((w) => a.n.includes(w)).length)
-    .slice(0, 8).map((x) => x.e);
-}
+const search = (q) => searchCategories(D, tipe(), q);
 const closeList = () => { $("res").hidden = true; };
 function showResults() {
   const q = $("q").value.trim(), list = search(q), ul = $("res");
@@ -320,8 +311,7 @@ document.addEventListener("click", (ev) => { if (!ev.target.closest(".combo")) c
 
 function remap() {
   if (!entry) return;
-  const same = set().filter((e) => e.k === entry.k && e.s === entry.s), mine = items(entry.j);
-  entry = same.find((e) => [...items(e.j)].some((x) => mine.has(x))) || same[0] || null;
+  entry = remapEntry(D, entry, tipe());
   if (entry) showChosen(); else $("chosen").textContent = "Kategori ini tidak ada untuk tipe penjual terpilih. Pilih ulang.";
 }
 
@@ -341,35 +331,12 @@ function refreshXtra() {
   $("vsel").innerHTML = vs.map((v, i) => `<option value="${i}">${v.j || "Semua jenis"}</option>`).join("");
 }
 
-/* ---------- hitung ---------- */
-function fees(price) {
-  const disc = Math.min(Math.max(val("diskon"), 0), 100) / 100, base = price * (1 - disc), L = [];
-  const add = (k, label, v, note = "") => { if (v > 0) L.push({ k, label, v, note }); };
-  if (entry) add("admin", "Biaya administrasi", base * entry.a / 100 * ($("umk").checked ? 0.5 : 1), pc(entry.a) + ($("umk").checked ? " ×50% UMK" : ""));
-  if (tipe() === "mall") add("pay", "Biaya pembayaran Shopee Mall", Math.min(base * T.mallPembayaran.persen / 100, T.mallPembayaran.maks), `${pc(T.mallPembayaran.persen)}, maks. ${rp(T.mallPembayaran.maks)}`);
-  const ov = val("order"), share = ov > base && base > 0 ? base / ov : 1;
-  add("proses", "Biaya proses pesanan", T.prosesPesanan * share, ov > base ? "dibagi proporsional" : "per pesanan");
-  if ($("xtra").checked && entry) {
-    const vs = entry[sched()], v = vs[Math.min(+$("vsel").value || 0, vs.length - 1)];
-    if (v) { const [p, cap] = $("ukuran-x").checked ? v.x : v.b; add("xtra", "Gratis Ongkir XTRA", Math.min(base * p / 100, cap), `${pc(p)}, maks. ${rp(cap)}`); }
-  }
-  const pr = $("promo").value;
-  if (pr) { const c = pr === "xp" ? T.promoXtraPlus : T.promoXtra; add("promo", pr === "xp" ? "Promo XTRA+" : "Promo XTRA", Math.min(base * c.persen / 100, c.maks), `${pc(c.persen)}, maks. ${rp(c.maks)}`); }
-  for (const [id, key, label] of [["live", "live", "Live XTRA"], ["video", "video", "Video XTRA"]]) {
-    if ($(id).checked) { const c = T[key], p = pr ? c.persenDenganPromo : c.persen; add(key, label, Math.min(base * p / 100, c.maks), `${pc(p)}, maks. ${rp(c.maks)}`); }
-  }
-  if ($("spay").value) add("spay", "SPayLater XTRA 0%", base * T.spaylater[$("spay").value] / 100, pc(T.spaylater[$("spay").value]));
-  if ($("pre").checked) add("pre", "Biaya produk Pre-Order", base * T.preorder / 100, pc(T.preorder));
-  const total = L.reduce((s, x) => s + x.v, 0);
-  return { base, L, total, net: base - total };
-}
-function solve(m, modal) {
-  const f = (p) => fees(p).net - modal - (m / 100) * p;
-  let lo = 0, hi = 1e10;
-  if (f(hi) <= 0) return null;
-  for (let i = 0; i < 80; i++) { const mid = (lo + hi) / 2; (f(mid) > 0 ? (hi = mid) : (lo = mid)); }
-  return Math.ceil(hi / 100) * 100;
-}
+/* ---------- hitung (mesin di /js/shopee-calc.js) ---------- */
+const opts = () => ({
+  tipe: tipe(), diskon: val("diskon"), order: val("order"), umk: $("umk").checked,
+  xtra: { on: $("xtra").checked, jadwal: $("jadwal").value, vi: +$("vsel").value || 0, ukuran: $("ukuran-x").checked ? "x" : "b" },
+  promo: $("promo").value, live: $("live").checked, video: $("video").checked, spay: $("spay").value, pre: $("pre").checked,
+});
 
 /* ---------- ! : validasi & peringatan ---------- */
 const FIELDS = ["q", "harga", "target", "modal", "diskon", "order"];
@@ -398,11 +365,11 @@ function render() {
   const blocking = issues.some((i) => i.level === "err");
   let price = val("harga"), minPrice = null;
   if (mode() === "harga" && !blocking) {
-    minPrice = solve(val("target"), modal);
+    minPrice = solve(D, entry, opts(), val("target"), modal);
     if (minPrice == null) issues.push({ id: "target", level: "err", msg: "Target margin ini tidak mungkin dicapai dengan biaya yang dipilih. Turunkan target atau kurangi program berbiaya." });
     else price = minPrice;
   }
-  const r = fees(price), laba = r.net - modal, margin = price > 0 ? laba / price * 100 : 0;
+  const r = fees(D, entry, opts(), price), laba = r.net - modal, margin = price > 0 ? laba / price * 100 : 0;
   const hasErr = issues.some((i) => i.level === "err");
   if (!hasErr && price > 0) {
     if (mode() === "laba" && r.base < modal) issues.push({ id: "harga", level: "warn", msg: "Harga setelah diskon lebih rendah dari modal, jadi rugi bahkan sebelum biaya platform." });

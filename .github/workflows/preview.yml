@@ -28,6 +28,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - run: npm test
 
       - name: Set wrangler output path
         run: echo "WRANGLER_OUTPUT_FILE_PATH=$RUNNER_TEMP/wrangler-output.ndjson" >> "$GITHUB_ENV"
