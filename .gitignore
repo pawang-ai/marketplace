@@ -2,3 +2,12 @@ node_modules/
 .wrangler/
 .dev.vars
 .env
+*.bundle
+*.patch
+
+# arsip & patch hasil unduhan/ekspor
+*.zip
+*.tar.gz
+*.tgz
+*.bundle
+*.patch
