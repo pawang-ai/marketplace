@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Kalkulator Shopee – Biaya penjual, laba & harga jual | Pawang</title>
+<meta name="description" content="Hitung biaya administrasi, proses pesanan, Gratis Ongkir XTRA dan laba bersih penjualan di Shopee untuk Non-Star, Star/Star+ dan Shopee Mall.">
+<link rel="icon" href="/img/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+<style>
+.top { display: flex; align-items: center; gap: 1.5rem; padding-block: 1.5rem 1rem; }
+.top img { width: 110px; height: auto; flex: none; }
+.top h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.1; font-weight: 800; }
+.top p { color: var(--muted); margin-top: .4rem; max-width: 40rem; }
+.shop { display: flex; align-items: center; gap: .6rem; font-size: .85rem; font-weight: 600; color: var(--muted); margin-bottom: .5rem; }
+.shop img { width: 22px; height: 22px; }
+.layout { display: grid; grid-template-columns: 1.1fr .9fr; gap: 1.5rem; align-items: start; padding-bottom: 3rem; }
+.card { background: var(--surface); border-radius: 18px; box-shadow: 0 0 0 1px var(--line); padding: 1.3rem; }
+form.card { display: grid; gap: 1.3rem; }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+legend, label.l { display: block; font: 700 .9rem "Plus Jakarta Sans", sans-serif; margin-bottom: .45rem; padding: 0; }
+.hint { font-size: .8rem; color: var(--muted); margin-top: .35rem; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: .4rem; }
+.seg label, .chk { cursor: pointer; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg span { display: block; text-align: center; padding: .6rem .5rem; border-radius: 10px; font-weight: 600; font-size: .92rem; box-shadow: inset 0 0 0 1.5px var(--line); }
+.seg input:checked + span { background: var(--cta-bg); color: var(--cta-ink); box-shadow: none; }
+.seg input:focus-visible + span { outline: 3px solid var(--fire); outline-offset: 2px; }
+input[type=text], input[type=search], select { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 0; border-radius: 10px; padding: .7rem .85rem; box-shadow: inset 0 0 0 1.5px var(--line); }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+.money { position: relative; }
+.money b { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--muted); pointer-events: none; }
+.money input { padding-left: 2.6rem; }
+.pick { position: relative; }
+.results { list-style: none; padding: 0; margin: .35rem 0 0; border-radius: 12px; background: var(--bg); box-shadow: 0 0 0 1.5px var(--line); max-height: 17rem; overflow: auto; }
+.results button { width: 100%; text-align: left; font: inherit; color: inherit; background: none; border: 0; padding: .6rem .85rem; cursor: pointer; display: block; }
+.results button:hover, .results button:focus-visible { background: light-dark(#fff1de, #1e2633); }
+.results small { display: block; color: var(--muted); font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chosen { margin-top: .5rem; padding: .7rem .85rem; border-radius: 12px; background: light-dark(color-mix(in oklab, var(--sage) 25%, var(--cream)), #1e2633); font-size: .92rem; }
+.chosen b { font-family: "Plus Jakarta Sans", sans-serif; }
+.opts { display: grid; gap: .55rem; }
+.chk { display: flex; gap: .6rem; align-items: flex-start; font-size: .93rem; }
+.chk input { margin-top: .25rem; flex: none; }
+.chk small { display: block; color: var(--muted); font-size: .8rem; }
+.sub { margin: .5rem 0 0 1.6rem; display: grid; gap: .5rem; }
+[hidden] { display: none !important; }
+.res { position: sticky; top: 1rem; display: grid; gap: 1rem; }
+.big { padding: 1.1rem 1.2rem; border-radius: 14px; background: #0b0e14; color: #f8fafc; }
+.big .lbl { font-size: .8rem; color: #aab4c3; }
+.big .num { font: 800 2rem/1.1 "Plus Jakarta Sans", sans-serif; margin-top: .2rem; }
+.big .num.neg { color: #f87171; } .big .num.pos { color: #34d399; }
+.big .mg { margin-top: .3rem; font-size: .9rem; color: #facc15; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th { text-align: left; font-weight: 500; padding: .4rem 0; }
+td { text-align: right; padding: .4rem 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+th small { color: var(--muted); }
+tr + tr { border-top: 1px solid var(--line); }
+tr.t th, tr.t td { font-weight: 700; }
+.warn { font-size: .85rem; padding: .7rem .9rem; border-radius: 12px; background: light-dark(#fff1de, #2a2112); }
+.notes { font-size: .8rem; color: var(--muted); display: grid; gap: .35rem; padding-left: 1.1rem; margin: 0; }
+footer .src { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } .res { position: static; } .row { grid-template-columns: 1fr; } .top img { width: 80px; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="spark" viewBox="0 0 24 24"><path d="M12 0c.9 6.3 5.7 11.1 12 12-6.3.9-11.1 5.7-12 12-.9-6.3-5.7-11.1-12-12C6.3 11.1 11.1 6.3 12 0Z"/></symbol></svg>
+<header><div class="wrap">
+  <a class="brand" href="/" aria-label="Pawang.dev – Marketplace">
+    <span class="tile"><img src="/img/logo-mark.webp" alt="" width="30" height="23"></span><span>Pawang<small>.dev</small></span>
+  </a>
+  <nav aria-label="Utama"><a href="/#marketplace">Marketplace</a><a href="/#filosofi">Filosofi</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="top">
+    <img src="/img/mascot.webp" width="110" height="112" alt="Maskot Pawang.dev">
+    <div>
+      <div class="shop"><img src="/img/mp/shopee.svg" alt="">Shopee Indonesia <svg class="spark" aria-hidden="true"><use href="#spark"/></svg></div>
+      <h1>Kalkulator biaya &amp; harga jual</h1>
+      <p>Pilih tipe penjual, kategori, dan program yang kamu ikuti. Hasilnya: biaya per unit, laba bersih, atau harga jual minimal untuk target margin.</p>
+    </div>
+  </div>
+
+  <div class="layout">
+    <form class="card" id="f" autocomplete="off" onsubmit="return false">
+      <fieldset>
+        <legend>1. Tipe penjual</legend>
+        <div class="seg" id="tipe">
+          <label><input type="radio" name="tipe" value="nonstar" checked><span>Non-Star</span></label>
+          <label><input type="radio" name="tipe" value="star"><span>Star / Star+</span></label>
+          <label><input type="radio" name="tipe" value="mall"><span>Shopee Mall</span></label>
+        </div>
+      </fieldset>
+
+      <div class="pick">
+        <label class="l" for="q">2. Kategori produk</label>
+        <input type="search" id="q" placeholder="Ketik, mis. hijab, earphone, skincare" role="combobox" aria-expanded="false" aria-controls="res" aria-autocomplete="list">
+        <ul class="results" id="res" role="listbox" hidden></ul>
+        <div class="chosen" id="chosen" aria-live="polite">Belum ada kategori dipilih.</div>
+        <div id="variant" hidden style="margin-top:.6rem"><label class="l" for="vsel">Jenis produk (menentukan tarif Gratis Ongkir XTRA)</label><select id="vsel"></select></div>
+      </div>
+
+      <fieldset>
+        <legend>3. Mode hitung</legend>
+        <div class="seg">
+          <label><input type="radio" name="mode" value="laba" checked><span>Hitung laba</span></label>
+          <label><input type="radio" name="mode" value="harga"><span>Cari harga jual</span></label>
+        </div>
+      </fieldset>
+
+      <div class="row">
+        <div id="hargaBox"><label class="l" for="harga">Harga asli produk</label><div class="money"><b>Rp</b><input type="text" id="harga" inputmode="numeric" value="100.000"></div></div>
+        <div id="targetBox" hidden><label class="l" for="target">Target margin laba (%)</label><input type="text" id="target" inputmode="decimal" value="20"></div>
+        <div><label class="l" for="modal">Modal / HPP per unit</label><div class="money"><b>Rp</b><input type="text" id="modal" inputmode="numeric" value="60.000"></div></div>
+      </div>
+      <div class="row">
+        <div><label class="l" for="diskon">Diskon &amp; voucher ditanggung penjual (%)</label><input type="text" id="diskon" inputmode="decimal" value="0"></div>
+        <div><label class="l" for="order">Nilai total pesanan <small>(opsional)</small></label><div class="money"><b>Rp</b><input type="text" id="order" inputmode="numeric" placeholder="sama dengan 1 produk"></div></div>
+      </div>
+
+      <fieldset>
+        <legend>4. Program &amp; biaya opsional</legend>
+        <div class="opts">
+          <div>
+            <label class="chk"><input type="checkbox" id="xtra"><span>Gratis Ongkir XTRA<small id="xtraInfo">Pilih kategori dulu.</small></span></label>
+            <div class="sub" id="xtraSub" hidden>
+              <div class="seg"><label><input type="radio" name="ukuran" value="b" checked><span>Ukuran biasa</span></label><label><input type="radio" name="ukuran" value="x" id="ukuran-x"><span>Ukuran khusus</span></label></div>
+              <select id="jadwal" aria-label="Jadwal tarif XTRA"></select>
+            </div>
+          </div>
+          <div><label class="l" for="promo" style="margin-bottom:.25rem">Program Promo XTRA</label>
+            <select id="promo"><option value="">Tidak ikut</option><option value="x">Promo XTRA (4,5%, maks. Rp60.000)</option><option value="xp">Promo XTRA+ (6,5%, maks. Rp80.000)</option></select></div>
+          <label class="chk"><input type="checkbox" id="live"><span>Pesanan dari Shopee Live<small>Live XTRA</small></span></label>
+          <label class="chk"><input type="checkbox" id="video"><span>Pesanan dari Shopee Video<small>Video XTRA</small></span></label>
+          <div><label class="l" for="spay" style="margin-bottom:.25rem">SPayLater XTRA 0%</label>
+            <select id="spay"><option value="">Tidak dipakai</option><option value="3">Tenor 3 bulan (2,5%)</option><option value="6">Tenor 6 bulan (4%)</option></select></div>
+          <label class="chk"><input type="checkbox" id="pre"><span>Produk Pre-Order<small>3%, kecuali kategori tertentu</small></span></label>
+          <label class="chk"><input type="checkbox" id="umk"><span>Insentif UMK: diskon 50% biaya administrasi<small>Perlu terverifikasi via SAPA UMKM, produk 100% lokal. Tidak untuk pangan siap saji &amp; elektronik dalam negeri.</small></span></label>
+        </div>
+      </fieldset>
+    </form>
+
+    <section class="res" aria-live="polite" aria-labelledby="rh">
+      <div class="card">
+        <h2 id="rh" style="font-size:1.1rem;margin-bottom:.8rem">Hasil per unit</h2>
+        <div class="big" id="big"></div>
+        <div id="warn" class="warn" hidden style="margin-top:.8rem"></div>
+        <table id="tbl" style="margin-top:.8rem"></table>
+      </div>
+      <ul class="notes card" id="notes"></ul>
+    </section>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <p class="src" id="src"></p>
+  <div class="status mono"><span class="a">mp.pawang.dev</span><span class="b">shopee ✓</span><span class="c">diperbarui otomatis</span><span class="d">Tenang, ada Pawang.</span></div>
+</div></footer>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const rp = (n) => (n < 0 ? "-Rp" : "Rp") + Math.round(Math.abs(n)).toLocaleString("id-ID");
+const pc = (n) => n.toLocaleString("id-ID", { maximumFractionDigits: 2 }) + "%";
+const val = (id) => parseFloat(String($(id).value).replace(/\./g, "").replace(",", ".")) || 0;
+const fmtMoney = (el) => { const n = parseInt(el.value.replace(/\D/g, ""), 10); el.value = isNaN(n) ? "" : n.toLocaleString("id-ID"); };
+
+let D, entry = null;
+try { D = await (await fetch("/data/shopee.json")).json(); }
+catch { $("big").textContent = "Data tarif gagal dimuat. Muat ulang halaman."; throw 0; }
+
+const T = D.tetap, M = D.meta;
+$("src").innerHTML = `Data dari Seller Edu Shopee, diambil ${M.diambil}. Biaya admin diperbarui ${M.diperbarui.admin}. <a href="${M.sumber.admin}" rel="noopener">Rincian per kategori</a> · <a href="${M.sumber.ringkasan}" rel="noopener">Ringkasan biaya</a>. Logo milik Shopee. Hasil adalah estimasi, cek Rincian Penghasilan di Seller Centre untuk angka final.`;
+const tipe = () => document.querySelector("[name=tipe]:checked").value;
+const mode = () => document.querySelector("[name=mode]:checked").value;
+const set = () => D.kategori[tipe() === "mall" ? "mall" : "reguler"];
+
+/* --- pilih kategori --- */
+const items = (s) => new Set(s.toLowerCase().split(/,\s*|;\s*/));
+function search(qs) {
+  const t = qs.toLowerCase().split(/\s+/).filter(Boolean);
+  if (!t.length) return [];
+  return set().map((e) => ({ e, h: `${e.k} ${e.s} ${e.j}`.toLowerCase(), n: `${e.k} ${e.s}`.toLowerCase() }))
+    .filter((x) => t.every((w) => x.h.includes(w)))
+    .sort((a, b) => t.filter((w) => b.n.includes(w)).length - t.filter((w) => a.n.includes(w)).length)
+    .slice(0, 8).map((x) => x.e);
+}
+function showResults() {
+  const list = search($("q").value), ul = $("res");
+  ul.replaceChildren(...list.map((e) => {
+    const li = document.createElement("li"), b = document.createElement("button"), s = document.createElement("small");
+    b.type = "button"; b.setAttribute("role", "option");
+    b.textContent = `${e.k} › ${e.s}  ·  admin ${pc(e.a)}`; s.textContent = e.j; b.append(s);
+    b.onclick = () => choose(e); li.append(b); return li;
+  }));
+  ul.hidden = !list.length; $("q").setAttribute("aria-expanded", String(!!list.length));
+  if (!list.length && $("q").value.trim()) { ul.hidden = false; ul.innerHTML = "<li style='padding:.6rem .85rem' class='hint'>Tidak ada kategori yang cocok.</li>"; }
+}
+function choose(e) {
+  entry = e; $("res").hidden = true; $("q").value = ""; $("q").setAttribute("aria-expanded", "false");
+  $("chosen").innerHTML = `<b>${e.k} › ${e.s}</b><br>Biaya administrasi: <b>${pc(e.a)}</b>`;
+  refreshXtra(); render();
+}
+$("q").addEventListener("input", showResults);
+$("q").addEventListener("keydown", (ev) => { if (ev.key === "Escape") { $("res").hidden = true; } });
+
+function remap() {
+  if (!entry) return;
+  const same = set().filter((e) => e.k === entry.k && e.s === entry.s);
+  const mine = items(entry.j);
+  entry = same.find((e) => [...items(e.j)].some((x) => mine.has(x))) || same[0] || null;
+  if (entry) $("chosen").innerHTML = `<b>${entry.k} › ${entry.s}</b><br>Biaya administrasi: <b>${pc(entry.a)}</b>`;
+  else $("chosen").textContent = "Kategori ini tidak ada untuk tipe penjual terpilih. Pilih ulang.";
+}
+
+/* --- XTRA --- */
+const sched = () => ($("jadwal").value === "d" ? "xd" : "xn");
+function refreshXtra() {
+  const ok = entry && entry.xn.length;
+  $("xtra").disabled = !ok;
+  $("xtraInfo").textContent = !entry ? "Pilih kategori dulu." : ok ? "Tarif persen kategori, dengan batas maksimum per produk." : "Tidak tersedia untuk kategori ini.";
+  if (!ok) $("xtra").checked = false;
+  const mall = tipe() === "mall", hasD = entry && entry.xd.length;
+  const cur = $("jadwal").value;
+  $("jadwal").innerHTML = `<option value="n">Tarif berlaku sekarang</option>` +
+    (hasD ? `<option value="d">Tarif mulai ${mall ? "1 Jan 2027" : "1 Des 2026"}</option>` : "");
+  if (cur === "d" && hasD) $("jadwal").value = "d";
+  $("xtraSub").hidden = !$("xtra").checked;
+  const vs = entry ? entry[sched()] : [];
+  $("variant").hidden = !($("xtra").checked && vs.length > 1);
+  $("vsel").innerHTML = vs.map((v, i) => `<option value="${i}">${v.j || "Semua jenis"}</option>`).join("");
+}
+
+/* --- hitung --- */
+function fees(price) {
+  const disc = Math.min(Math.max(val("diskon"), 0), 100) / 100;
+  const base = price * (1 - disc), L = [];
+  const add = (k, label, v, note = "") => { if (v > 0) L.push({ k, label, v, note }); };
+  if (entry) {
+    add("admin", "Biaya administrasi", base * entry.a / 100 * ($("umk").checked ? 0.5 : 1), pc(entry.a) + ($("umk").checked ? " ×50% UMK" : ""));
+  }
+  if (tipe() === "mall") add("pay", "Biaya pembayaran Shopee Mall", Math.min(base * T.mallPembayaran.persen / 100, T.mallPembayaran.maks), `${pc(T.mallPembayaran.persen)}, maks. ${rp(T.mallPembayaran.maks)}`);
+  const ov = val("order"), share = ov > base && base > 0 ? base / ov : 1;
+  add("proses", "Biaya proses pesanan", T.prosesPesanan * share, ov > base ? "dibagi proporsional" : "per pesanan");
+  if ($("xtra").checked && entry) {
+    const vs = entry[sched()], v = vs[Math.min(+$("vsel").value || 0, vs.length - 1)];
+    if (v) { const [p, cap] = $("ukuran-x").checked ? v.x : v.b; add("xtra", "Gratis Ongkir XTRA", Math.min(base * p / 100, cap), `${pc(p)}, maks. ${rp(cap)}`); }
+  }
+  const pr = $("promo").value;
+  if (pr) { const c = pr === "xp" ? T.promoXtraPlus : T.promoXtra; add("promo", pr === "xp" ? "Promo XTRA+" : "Promo XTRA", Math.min(base * c.persen / 100, c.maks), `${pc(c.persen)}, maks. ${rp(c.maks)}`); }
+  for (const [id, key, label] of [["live", "live", "Live XTRA"], ["video", "video", "Video XTRA"]]) {
+    if ($(id).checked) { const c = T[key], p = pr ? c.persenDenganPromo : c.persen; add(key, label, Math.min(base * p / 100, c.maks), `${pc(p)}, maks. ${rp(c.maks)}`); }
+  }
+  if ($("spay").value) add("spay", "SPayLater XTRA 0%", base * T.spaylater[$("spay").value] / 100, pc(T.spaylater[$("spay").value]));
+  if ($("pre").checked) add("pre", "Biaya produk Pre-Order", base * T.preorder / 100, pc(T.preorder));
+  const total = L.reduce((s, x) => s + x.v, 0);
+  return { base, L, total, net: base - total };
+}
+
+function solve(m, modal) {
+  const f = (p) => { const r = fees(p); return r.net - modal - (m / 100) * p; };
+  let lo = 0, hi = 1e10;
+  if (f(hi) <= 0) return null;
+  for (let i = 0; i < 80; i++) { const mid = (lo + hi) / 2; (f(mid) > 0 ? (hi = mid) : (lo = mid)); }
+  return Math.ceil(hi / 100) * 100;
+}
+
+function render() {
+  const modal = val("modal"), warn = $("warn"); warn.hidden = true;
+  let price = val("harga"), minPrice = null;
+  if (mode() === "harga") {
+    minPrice = solve(val("target"), modal);
+    if (minPrice == null) { warn.hidden = false; warn.textContent = "Target margin ini tidak mungkin dicapai dengan biaya yang dipilih. Turunkan target atau kurangi program berbiaya."; price = 0; }
+    else price = minPrice;
+  }
+  if (!entry) { warn.hidden = false; warn.textContent = "Pilih kategori produk dulu agar biaya administrasi dihitung."; }
+  const r = fees(price), laba = r.net - modal, margin = price > 0 ? laba / price * 100 : 0;
+  const head = mode() === "harga" && minPrice != null
+    ? `<div class="lbl">Harga jual asli minimal</div><div class="num pos">${rp(minPrice)}</div><div class="mg">Laba ${rp(laba)} · margin ${pc(margin)}</div>`
+    : `<div class="lbl">Laba bersih per unit</div><div class="num ${laba < 0 ? "neg" : "pos"}">${rp(laba)}</div><div class="mg">Margin ${pc(margin)} dari harga asli</div>`;
+  $("big").innerHTML = head;
+  const disc = price - r.base;
+  const rows = [`<tr><th>Harga asli</th><td>${rp(price)}</td></tr>`];
+  if (disc > 0) rows.push(`<tr><th>Diskon &amp; voucher penjual</th><td>-${rp(disc)}</td></tr>`);
+  r.L.forEach((x) => rows.push(`<tr><th>${x.label}<br><small>${x.note}</small></th><td>-${rp(x.v)}</td></tr>`));
+  rows.push(`<tr class="t"><th>Total biaya platform</th><td>-${rp(r.total)}</td></tr>`,
+    `<tr class="t"><th>Dana diterima</th><td>${rp(r.net)}</td></tr>`, `<tr><th>Modal / HPP</th><td>-${rp(modal)}</td></tr>`,
+    `<tr class="t"><th>Laba bersih</th><td>${rp(laba)}</td></tr>`);
+  $("tbl").innerHTML = rows.join("");
+  const tarifD = $("jadwal").value === "d";
+  $("notes").innerHTML = [
+    "Semua biaya sudah termasuk PPN dan dihitung dari harga setelah diskon &amp; voucher yang ditanggung penjual, tidak dari ongkir.",
+    "Batas maksimum biaya berlaku per kuantitas produk, jadi hasil di sini per 1 unit.",
+    "Biaya proses pesanan Rp1.250 per pesanan. Isi nilai total pesanan jika pembeli biasanya membeli beberapa produk sekaligus.",
+    "Dasar perhitungan biaya pembayaran Mall, SPayLater dan Pre-Order diasumsikan sama dengan harga setelah diskon (artikel sumber tidak merinci).",
+    tarifD ? "Tarif XTRA yang dipilih berlaku di masa depan; Promo, Live dan Video XTRA memakai tarif saat ini." : "Tarif XTRA yang dipakai adalah tarif yang berlaku sekarang.",
+  ].map((t) => `<li>${t}</li>`).join("");
+}
+
+/* --- event --- */
+document.querySelectorAll("[name=tipe]").forEach((r) => r.addEventListener("change", () => { remap(); refreshXtra(); render(); }));
+document.querySelectorAll("[name=mode]").forEach((r) => r.addEventListener("change", () => { const h = mode() === "harga"; $("hargaBox").hidden = h; $("targetBox").hidden = !h; render(); }));
+for (const id of ["harga", "modal", "order"]) $(id).addEventListener("blur", (e) => { fmtMoney(e.target); render(); });
+$("f").addEventListener("input", (e) => { if (!["q"].includes(e.target.id)) render(); });
+$("f").addEventListener("change", () => { refreshXtra(); render(); });
+refreshXtra(); render();
+</script>
+</body>
+</html>
