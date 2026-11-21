@@ -21,8 +21,8 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -50,10 +50,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ALIAS: ${{ steps.url.outputs.alias }}
           VERSION: ${{ steps.url.outputs.version }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           gh pr comment "${{ github.event.pull_request.number }}" --edit-last --create-if-none --body "$(cat <<EOF
           ### Preview marketplace
           - Alias (selalu versi terbaru PR ini): ${ALIAS:-tidak tersedia}
-          - Versi ini (${GITHUB_SHA::7}): ${VERSION:-tidak tersedia}
+          - Versi ini (${HEAD_SHA::7}): ${VERSION:-tidak tersedia}
           EOF
           )"
