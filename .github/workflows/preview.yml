@@ -1,0 +1,57 @@
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    # Fork PRs have no access to repo secrets.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+      # Uploads a new Worker version WITHOUT deploying it to mp.pawang.dev.
+      - name: Upload version
+        run: >
+          npx wrangler versions upload
+          --preview-alias pr-${{ github.event.pull_request.number }}
+          --message "PR #${{ github.event.pull_request.number }} ${{ github.event.pull_request.head.sha }}"
+
+      - name: Read preview URL
+        id: url
+        run: |
+          echo "alias=$(jq -rs 'map(select(.type=="version-upload"))|last|.preview_alias_url // empty' "$WRANGLER_OUTPUT_FILE_PATH")" >> "$GITHUB_OUTPUT"
+          echo "version=$(jq -rs 'map(select(.type=="version-upload"))|last|.preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH")" >> "$GITHUB_OUTPUT"
+
+      - name: Comment preview URL
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ALIAS: ${{ steps.url.outputs.alias }}
+          VERSION: ${{ steps.url.outputs.version }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" --edit-last --create-if-none --body "$(cat <<EOF
+          ### Preview marketplace
+          - Alias (selalu versi terbaru PR ini): ${ALIAS:-tidak tersedia}
+          - Versi ini (${GITHUB_SHA::7}): ${VERSION:-tidak tersedia}
+          EOF
+          )"
