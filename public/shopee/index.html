@@ -74,7 +74,10 @@ tr.t th, tr.t td { font-weight: 700; }
 
 .notes:empty { display: none; }
 .notes { font-size: .8rem; color: var(--muted); display: grid; gap: .35rem; padding-left: 1.1rem; margin: 0; }
-footer .src { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+.tip a { color: inherit; text-underline-offset: 2px; }
+.tip ul { margin: .4rem 0 0; padding-left: 1.1rem; }
+.lh.hd { margin-bottom: .8rem; }
+.lh.hd h2 { font-size: 1.1rem; }
 @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } .res { position: static; } .row { grid-template-columns: 1fr; } .top img { width: 80px; } }
 
 /* label + ? + ! */
@@ -186,7 +189,7 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
 
     <section class="res" aria-live="polite" aria-labelledby="rh">
       <div class="card">
-        <h2 id="rh" style="font-size:1.1rem;margin-bottom:.8rem">Hasil per unit</h2>
+        <div class="lh hd" data-help="sumber" data-name="Sumber data tarif"><h2 id="rh">Hasil per unit</h2></div>
         <div class="big" id="big"></div>
         <ul id="alerts" class="alerts" aria-live="polite"></ul>
         <table id="tbl" style="margin-top:.8rem"></table>
@@ -197,8 +200,7 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
 </main>
 
 <footer><div class="wrap">
-  <p class="src" id="src"></p>
-  <div class="status mono"><span class="a">mp.pawang.dev</span><span class="b">shopee ✓</span><span class="c">diperbarui otomatis</span><span class="d">Tenang, ada Pawang.</span></div>
+  <div class="status mono" data-footer data-mp="shopee"><span class="a">mp.pawang.dev</span><span class="b" data-f="scope" hidden></span><span class="c" data-f="data" hidden></span><span class="d">Tenang, ada Pawang.</span></div>
 </div></footer>
 
 <script type="module">
@@ -223,10 +225,11 @@ const HELP = {
   xtra: "Biaya persen dari harga setelah diskon, dengan batas maksimum per produk. Pilih ukuran produk sesuai ketentuan Shopee; tarif ukuran khusus lebih tinggi.",
   promo: "Pilih salah satu: Promo XTRA 4,5% atau Promo XTRA+ 6,5% dari harga setelah diskon, dengan batas maksimum per produk.",
   spay: "Cicilan 0% untuk pembeli, biayanya ditanggung penjual: 2,5% untuk tenor 3 bulan, 4% untuk 6 bulan.",
+  sumber: "Memuat sumber data…",
   umk: "Diskon 50% biaya administrasi untuk penjual UMK terverifikasi (SAPA UMKM) dengan produk 100% lokal. Tidak berlaku untuk makanan siap saji dan elektronik buatan dalam negeri.",
 };
 document.querySelectorAll("[data-help]").forEach((h) => {
-  const k = h.dataset.help, name = h.querySelector("label, .l").textContent.replace(/^\d\.\s*/, "").replace(/\s*\(.*?\)\s*$/, "").trim();
+  const k = h.dataset.help, name = (h.dataset.name || h.querySelector("label, .l").textContent).replace(/^\d\.\s*/, "").replace(/\s*\(.*?\)\s*$/, "").trim();
   const b = document.createElement("button"), tip = document.createElement("div");
   tip.id = "h-" + k; tip.className = "tip"; tip.textContent = HELP[k];
   tip.setAttribute("popover", "hint"); tip.setAttribute("role", "tooltip");
@@ -258,11 +261,19 @@ if (!("interestForElement" in HTMLButtonElement.prototype)) { /* hover & fokus u
 }
 
 /* ---------- data ---------- */
+import { loadMeta } from "/js/footer.js";
 let D, entry = null;
 try { D = await (await fetch("/data/shopee.json")).json(); }
 catch { $("big").textContent = "Data tarif gagal dimuat. Muat ulang halaman."; throw 0; }
-const T = D.tetap, M = D.meta;
-$("src").innerHTML = `Data dari Seller Edu Shopee, diambil ${M.diambil}. Biaya admin diperbarui ${M.diperbarui.admin}. <a href="${M.sumber.admin}" rel="noopener">Rincian per kategori</a> · <a href="${M.sumber.ringkasan}" rel="noopener">Ringkasan biaya</a>. Logo milik Shopee. Hasil adalah estimasi, cek Rincian Penghasilan di Seller Centre untuk angka final.`;
+const T = D.tetap;
+loadMeta().then((all) => {
+  const m = all?.marketplaces.shopee, tip = $("h-sumber");
+  if (!m) { tip.textContent = "Sumber data tidak dapat dimuat."; return; }
+  const d = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  const ul = document.createElement("ul");
+  ul.append(...m.sumber.map((x) => { const li = document.createElement("li"), a = document.createElement("a"); a.href = x.url; a.rel = "noopener"; a.textContent = x.label; li.append(a); return li; }));
+  tip.replaceChildren(`Tarif diambil dari Seller Edu Shopee pada ${d(m.diambil)}; biaya administrasi diperbarui Shopee pada ${d(m.tarifPer)}. Hasil adalah estimasi, cek Rincian Penghasilan di Seller Centre untuk angka final.`, ul);
+});
 const tipe = () => document.querySelector("[name=tipe]:checked").value;
 const mode = () => document.querySelector("[name=mode]:checked").value;
 const set = () => D.kategori[tipe() === "mall" ? "mall" : "reguler"];

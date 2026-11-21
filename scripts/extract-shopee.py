@@ -2,6 +2,7 @@
 """Ekstrak tarif penjual Shopee dari index.db (Seller Edu) ke public/data/shopee.json.
 
 Pemakaian: python3 scripts/extract-shopee.py /path/index.db [public/data/shopee.json]
+Menulis juga public/data/meta.json (tanggal data & sumber, dibaca footer semua halaman).
 Hanya stdlib. Artikel sumber: 15965 (admin per kategori), 7216 (Gratis Ongkir XTRA),
 3489 (ringkasan biaya), 25787 (proses pesanan), 28672 (insentif UMK).
 Tabel sumber memakai sel gabungan; baris yang kehilangan sel diwarisi dari baris
@@ -170,13 +171,24 @@ def main():
             stats[which, "xn_kosong"] += not r["xn"]
             stats[which, "xd_kosong"] += not r["xd"]
             stats[which, "xn_ambigu"] += len(r["xn"]) > 1
+    meta = {
+        "marketplaces": {
+            "shopee": {
+                "nama": "Shopee",
+                "diambil": fetched[:10],
+                "tarifPer": admin_upd[:10],
+                "xtraPer": xtra_upd[:10],
+                "sumber": [
+                    {"label": "Rincian biaya per kategori", "url": BASE + "15965"},
+                    {"label": "Gratis Ongkir XTRA", "url": BASE + "7216"},
+                    {"label": "Ringkasan biaya penjual", "url": BASE + "3489"},
+                    {"label": "Biaya proses pesanan", "url": BASE + "25787"},
+                    {"label": "Insentif UMK", "url": BASE + "28672"},
+                ],
+            }
+        }
+    }
     data = {
-        "meta": {
-            "diambil": fetched[:10],
-            "diperbarui": {"admin": admin_upd, "xtra": xtra_upd},
-            "sumber": {k: BASE + v for k, v in dict(admin="15965", xtra="7216", ringkasan="3489", prosesPesanan="25787", umk="28672").items()},
-            "xtraMulai": {"nonMall": "2026-12-01", "mall": "2027-01-01"},
-        },
         "tetap": {
             "prosesPesanan": 1250,
             "mallPembayaran": {"persen": 1.8, "maks": 50000},
@@ -192,6 +204,9 @@ def main():
     }
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+    with open(OUT.rsplit("/", 1)[0] + "/meta.json", "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=1)
+        f.write("\n")
     print(f"{OUT}: reguler={len(admin['reguler'])} mall={len(admin['mall'])}", dict(stats))
 
 
