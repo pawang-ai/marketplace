@@ -88,12 +88,11 @@ footer .src { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
 @supports (position-area: block-start) {
   .tip { inset: auto; margin: .4rem 0; position-area: block-start; position-try-fallbacks: flip-block, flip-inline; }
 }
-.flag, .fmsg::before { flex: none; display: inline-grid; place-items: center; width: 1.3rem; height: 1.3rem; border-radius: 50%; font: 800 .8rem/1 "Plus Jakarta Sans", sans-serif; }
-.flag { margin-left: .4rem; }
-.flag.err, .fmsg.err::before, .alert.err::before { background: light-dark(#b42318, #f87171); color: light-dark(#fff, #14213d); }
-.flag.warn, .fmsg.warn::before, .alert.warn::before { background: light-dark(#b45309, #facc15); color: light-dark(#fff, #14213d); }
+.fmsg::before { flex: none; display: inline-grid; place-items: center; width: 1.1rem; height: 1.1rem; margin-top: .05rem; border-radius: 50%; font: 800 .7rem/1 "Plus Jakarta Sans", sans-serif; content: "!"; }
+.req { margin-left: .2rem; color: light-dark(#b42318, #f87171); font-weight: 800; }
+.fmsg.err::before, .alert.err::before { background: light-dark(#b42318, #f87171); color: light-dark(#fff, #14213d); }
+.fmsg.warn::before, .alert.warn::before { background: light-dark(#b45309, #facc15); color: light-dark(#fff, #14213d); }
 .fmsg { display: flex; gap: .5rem; align-items: flex-start; margin-top: .4rem; font-size: .82rem; line-height: 1.4; }
-.fmsg::before { content: "!"; width: 1.1rem; height: 1.1rem; font-size: .7rem; margin-top: .05rem; }
 .fmsg.err { color: light-dark(#b42318, #fca5a5); } .fmsg.warn { color: light-dark(#8a4108, #fde68a); }
 input[data-warn] { box-shadow: inset 0 0 0 2px light-dark(#b45309, #facc15); }
 input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f87171); }
@@ -101,7 +100,6 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
 .alert { display: flex; gap: .6rem; align-items: flex-start; font-size: .86rem; line-height: 1.4; padding: .6rem .75rem; border-radius: 12px; background: light-dark(#fff1de, #2a2112); }
 .alert.err { background: light-dark(#fdecea, #2d1618); }
 .alert::before { content: "!"; flex: none; display: grid; place-items: center; width: 1.2rem; height: 1.2rem; border-radius: 50%; font: 800 .75rem/1 "Plus Jakarta Sans", sans-serif; }
-.big .num .flag { margin-left: .5rem; vertical-align: middle; font-size: 1rem; width: 1.6rem; height: 1.6rem; }
 </style>
 </head>
 <body>
@@ -135,9 +133,9 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
       </fieldset>
 
       <div>
-        <div class="lh" data-help="kategori" data-field="q"><label class="l" for="q">2. Kategori produk</label></div>
+        <div class="lh" data-help="kategori" data-field="q"><label class="l" for="q">2. Kategori produk<span class="req" aria-hidden="true">*</span></label></div>
         <div class="combo">
-          <input type="search" id="q" placeholder="Ketik, mis. hijab, earphone, skincare" aria-controls="res" aria-describedby="e-q qstat">
+          <input type="search" id="q" aria-required="true" placeholder="Ketik, mis. hijab, earphone, skincare" aria-controls="res" aria-describedby="e-q qstat">
           <ul class="results" id="res" aria-label="Hasil pencarian kategori" hidden></ul>
         </div>
         <p class="hint" id="qstat" aria-live="polite"></p>
@@ -155,13 +153,13 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
       </fieldset>
 
       <div class="row">
-        <div id="hargaBox"><div class="lh" data-help="harga" data-field="harga"><label class="l" for="harga">Harga asli produk</label></div><div class="money"><b>Rp</b><input type="text" id="harga" inputmode="numeric" value="100.000" aria-describedby="e-harga"></div><p class="fmsg" id="e-harga" hidden></p></div>
-        <div id="targetBox" hidden><div class="lh" data-help="target" data-field="target"><label class="l" for="target">Target margin laba (%)</label></div><input type="text" id="target" inputmode="decimal" value="20" aria-describedby="e-target"><p class="fmsg" id="e-target" hidden></p></div>
-        <div><div class="lh" data-help="modal" data-field="modal"><label class="l" for="modal">Modal / HPP per unit</label></div><div class="money"><b>Rp</b><input type="text" id="modal" inputmode="numeric" value="60.000" aria-describedby="e-modal"></div><p class="fmsg" id="e-modal" hidden></p></div>
+        <div id="hargaBox"><div class="lh" data-help="harga" data-field="harga"><label class="l" for="harga">Harga asli produk<span class="req" aria-hidden="true">*</span></label></div><div class="money"><b>Rp</b><input type="text" id="harga" aria-required="true" inputmode="numeric" value="100.000" aria-describedby="e-harga"></div><p class="fmsg" id="e-harga" hidden></p></div>
+        <div id="targetBox" hidden><div class="lh" data-help="target" data-field="target"><label class="l" for="target">Target margin laba (%)<span class="req" aria-hidden="true">*</span></label></div><input type="text" id="target" aria-required="true" inputmode="decimal" value="20" aria-describedby="e-target"><p class="fmsg" id="e-target" hidden></p></div>
+        <div><div class="lh" data-help="modal" data-field="modal"><label class="l" for="modal">Modal / HPP per unit<span class="req" aria-hidden="true">*</span></label></div><div class="money"><b>Rp</b><input type="text" id="modal" aria-required="true" inputmode="numeric" value="60.000" aria-describedby="e-modal"></div><p class="fmsg" id="e-modal" hidden></p></div>
       </div>
       <div class="row">
         <div><div class="lh" data-help="diskon" data-field="diskon"><label class="l" for="diskon">Diskon &amp; voucher penjual (%)</label></div><input type="text" id="diskon" inputmode="decimal" value="0" aria-describedby="e-diskon"><p class="fmsg" id="e-diskon" hidden></p></div>
-        <div><div class="lh" data-help="order" data-field="order"><label class="l" for="order">Nilai total pesanan <small>(opsional)</small></label></div><div class="money"><b>Rp</b><input type="text" id="order" inputmode="numeric" placeholder="sama dengan 1 produk" aria-describedby="e-order"></div><p class="fmsg" id="e-order" hidden></p></div>
+        <div><div class="lh" data-help="order" data-field="order"><label class="l" for="order">Nilai total pesanan</label></div><div class="money"><b>Rp</b><input type="text" id="order" inputmode="numeric" placeholder="sama dengan 1 produk" aria-describedby="e-order"></div><p class="fmsg" id="e-order" hidden></p></div>
       </div>
 
       <fieldset aria-labelledby="l-prog">
@@ -236,7 +234,6 @@ document.querySelectorAll("[data-help]").forEach((h) => {
   b.setAttribute("interestfor", tip.id); b.setAttribute("popovertarget", tip.id); b.setAttribute("popovertargetaction", "show");
   b.setAttribute("aria-label", "Penjelasan " + name); b.setAttribute("aria-expanded", "false");
   h.append(b, tip);
-  if (h.dataset.field) { const f = document.createElement("span"); f.className = "flag"; f.dataset.flag = h.dataset.field; f.hidden = true; f.setAttribute("role", "img"); f.setAttribute("aria-label", "Perlu perhatian"); f.textContent = "!"; h.append(f); }
 });
 document.addEventListener("toggle", (e) => {
   if (!e.target.id) return;
@@ -378,9 +375,8 @@ function validate() {
 function paint(issues) {
   const by = Object.fromEntries(issues.map((i) => [i.id, i]));
   for (const id of FIELDS) {
-    const i = by[id], m = $("e-" + id), fl = document.querySelector(`[data-flag="${id}"]`), inp = $(id);
+    const i = by[id], m = $("e-" + id), inp = $(id);
     m.hidden = !i; m.className = "fmsg" + (i ? " " + i.level : ""); m.textContent = i ? i.msg : "";
-    if (fl) { fl.hidden = !i; fl.className = "flag" + (i ? " " + i.level : ""); }
     if (i && i.level === "err") inp.setAttribute("aria-invalid", "true"); else inp.removeAttribute("aria-invalid");
     inp.toggleAttribute("data-warn", !!i && i.level === "warn");
   }
@@ -402,19 +398,18 @@ function render() {
     if (val("order") > 0 && val("order") < r.base) issues.push({ id: "order", level: "warn", msg: "Nilai pesanan lebih kecil dari harga produk, dihitung sebagai 1 produk per pesanan." });
   }
   paint(issues);
-  const alerts = issues.map((i) => ({ level: i.level, msg: i.msg }));
+  const alerts = [];
   if (!hasErr && price > 0 && laba < 0) alerts.push({ level: "warn", msg: `Laba bersih minus ${rp(-laba)} per unit. Naikkan harga, turunkan diskon, atau kurangi program berbiaya.` });
   else if (!hasErr && price > 0 && margin < 5 && laba >= 0) alerts.push({ level: "warn", msg: `Margin hanya ${pc(margin)}, tipis jika ada retur atau biaya tak terduga.` });
   $("alerts").replaceChildren(...alerts.map((a) => { const li = document.createElement("li"); li.className = "alert " + a.level; li.textContent = a.msg; return li; }));
 
-  const flag = (lv) => `<span class="flag ${lv}" role="img" aria-label="Perlu perhatian">!</span>`;
   if (hasErr) {
-    $("big").innerHTML = `<div class="lbl">Hasil belum lengkap</div><div class="num">—</div><div class="mg">Lengkapi isian bertanda !</div>`;
+    $("big").innerHTML = `<div class="lbl">Hasil belum lengkap</div><div class="num">—</div><div class="mg">Lengkapi isian bertanda *</div>`;
     $("tbl").innerHTML = ""; $("notes").innerHTML = ""; return;
   }
   $("big").innerHTML = mode() === "harga" && minPrice != null
     ? `<div class="lbl">Harga jual asli minimal</div><div class="num pos">${rp(minPrice)}</div><div class="mg">Laba ${rp(laba)} · margin ${pc(margin)}</div>`
-    : `<div class="lbl">Laba bersih per unit</div><div class="num ${laba < 0 ? "neg" : "pos"}">${rp(laba)}${laba < 0 ? flag("warn") : ""}</div><div class="mg">Margin ${pc(margin)} dari harga asli</div>`;
+    : `<div class="lbl">Laba bersih per unit</div><div class="num ${laba < 0 ? "neg" : "pos"}">${rp(laba)}</div><div class="mg">Margin ${pc(margin)} dari harga asli</div>`;
   const disc = price - r.base, rows = [`<tr><th>Harga asli</th><td>${rp(price)}</td></tr>`];
   if (disc > 0) rows.push(`<tr><th>Diskon &amp; voucher penjual</th><td>-${rp(disc)}</td></tr>`);
   r.L.forEach((x) => rows.push(`<tr><th>${x.label}<br><small>${x.note}</small></th><td>-${rp(x.v)}</td></tr>`));
