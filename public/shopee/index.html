@@ -78,6 +78,68 @@ tr.t th, tr.t td { font-weight: 700; }
 .tip ul { margin: .4rem 0 0; padding-left: 1.1rem; }
 .lh.hd { margin-bottom: .8rem; }
 .lh.hd h2 { font-size: 1.1rem; }
+/* tab & banyak produk */
+.tabs { display: flex; gap: .4rem; margin-bottom: 1rem; }
+.tabs button { font: 700 .95rem "Plus Jakarta Sans", sans-serif; padding: .6rem 1.1rem; border: 0; border-radius: 10px; background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1.5px var(--line); cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--cta-bg); color: var(--cta-ink); box-shadow: none; }
+.btn.sm { padding: .55rem 1rem; font-size: .88rem; box-shadow: 0 3px 0 light-dark(#d96a1c, #c9a50f); }
+.btn.sm.ghost { box-shadow: inset 0 0 0 2px var(--line); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.bset { display: grid; gap: 1.2rem; margin-bottom: 1rem; }
+.bgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; align-items: start; }
+.bprog { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .6rem .9rem; align-items: center; }
+.bprog select { padding: .5rem .7rem; font-size: .9rem; }
+.btools { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1rem; }
+.bmsg { font-size: .85rem; color: var(--muted); }
+.bsum { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem; margin-bottom: 1rem; }
+.bsum div { padding: .7rem .9rem; border-radius: 12px; background: light-dark(#fff1de, #1e2633); }
+.bsum dt, .bsum small { font-size: .75rem; color: var(--muted); display: block; }
+.bsum b { font: 800 1.05rem "Plus Jakarta Sans", sans-serif; font-variant-numeric: tabular-nums; }
+.bsum .neg { color: light-dark(#b42318, #f87171); }
+.table-wrapper { overflow: auto; max-inline-size: 100%; max-block-size: min(640px, 75vh); container-type: inline-size; border-radius: 12px; box-shadow: 0 0 0 1px var(--line); }
+#bt { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1120px; font-size: .88rem; }
+#bt thead { position: sticky; inset-block-start: 0; z-index: 2; }
+#bt th, #bt td { padding: .4rem .5rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); background: var(--surface); }
+#bt thead th { font: 700 .78rem "Plus Jakarta Sans", sans-serif; white-space: nowrap; color: var(--muted); }
+#bt tbody th { position: sticky; inset-inline-start: 0; z-index: 1; min-width: 150px; font-weight: 400; }
+#bt thead th:first-child { position: sticky; inset-inline-start: 0; z-index: 3; }
+#bt td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-top: .8rem; }
+#bt td.num .neg { color: light-dark(#b42318, #f87171); font-weight: 700; }
+#bt input, #bt select, .katbtn { width: 100%; font: inherit; font-size: .88rem; color: var(--ink); background: var(--bg); border: 0; border-radius: 8px; padding: .5rem .55rem; box-shadow: inset 0 0 0 1.5px var(--line); }
+#bt input[aria-invalid="true"], .katbtn[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f87171); }
+#bt input[data-warn] { box-shadow: inset 0 0 0 2px light-dark(#b45309, #facc15); }
+#bt input.m { min-width: 7.5rem; }
+#bt td:nth-child(5) input, #bt td:nth-child(7) input { min-width: 4.5rem; }
+#bt td:nth-child(3) select { min-width: 6rem; }
+.katbtn { text-align: left; cursor: pointer; min-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.katbtn:empty::before { content: "Pilih kategori"; color: var(--muted); }
+#bt td .vsel { margin-top: .3rem; }
+#bt td .fmsg { margin: .5rem 0 0; min-width: 190px; }
+.acts { display: flex; gap: .3rem; padding-top: .3rem; }
+.acts button { width: 2rem; height: 2rem; border: 0; border-radius: 8px; background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1.5px var(--line); cursor: pointer; font-size: .95rem; }
+.acts button:hover { background: light-dark(#fff1de, #1e2633); color: var(--ink); }
+.results.inline { position: static; box-shadow: none; padding: 0; max-height: 50vh; margin-top: .5rem; }
+dialog { width: min(640px, calc(100vw - 2rem)); max-height: 88vh; padding: 1.2rem; border: 0; border-radius: 18px; background: var(--surface); color: var(--ink); box-shadow: 0 24px 60px -16px rgb(0 0 0 / .55); }
+dialog:modal { overscroll-behavior: contain; }
+dialog::backdrop { background: rgb(0 0 0 / .5); overflow: hidden; overscroll-behavior: contain; }
+.dhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; }
+.dhead h2, dialog h2 { font-size: 1.15rem; }
+.dhead .x { border: 0; background: transparent; color: var(--muted); font-size: 1.1rem; width: 2rem; height: 2rem; border-radius: 8px; cursor: pointer; }
+dialog textarea { width: 100%; font: .85rem ui-monospace, Menlo, monospace; color: var(--ink); background: var(--bg); border: 0; border-radius: 10px; padding: .7rem; box-shadow: inset 0 0 0 1.5px var(--line); margin-block: .6rem; resize: vertical; }
+.drow { display: flex; gap: .6rem; align-items: center; margin-top: .8rem; flex-wrap: wrap; }
+.spacer { flex: 1; }
+@container (width < 760px) {
+  #bt { min-width: 0; }
+  #bt, #bt thead, #bt tbody, #bt tr, #bt th, #bt td { display: block; }
+  #bt thead { display: none; } /* label tiap sel disisipkan lewat ::before */
+  #bt tr { margin: 0 0 .9rem; border-radius: 12px; box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+  #bt tbody th { position: static; min-width: 0; }
+  #bt td { display: grid; grid-template-columns: 7.2rem minmax(0, 1fr); gap: .5rem; align-items: center; }
+  #bt td::before { content: attr(data-label); font-size: .78rem; font-weight: 600; color: var(--muted); }
+  #bt td.num { text-align: left; padding-top: .4rem; }
+  .katbtn { min-width: 0; }
+}
+
 @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } .res { position: static; } .row { grid-template-columns: 1fr; } .top img { width: 80px; } }
 
 /* label + ? + ! */
@@ -124,6 +186,11 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
     </div>
   </div>
 
+  <div class="tabs" role="tablist" aria-label="Mode kalkulator">
+    <button type="button" role="tab" id="tab-satu" aria-controls="v-satu" aria-selected="true">Satu produk</button>
+    <button type="button" role="tab" id="tab-banyak" aria-controls="v-banyak" aria-selected="false" tabindex="-1">Banyak produk</button>
+  </div>
+  <div id="v-satu" role="tabpanel" aria-labelledby="tab-satu">
   <div class="layout">
     <form class="card" id="f" autocomplete="off" onsubmit="return false" novalidate>
       <fieldset aria-labelledby="l-tipe">
@@ -197,6 +264,88 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
       <ul class="notes card" id="notes"></ul>
     </section>
   </div>
+  </div>
+
+  <section id="v-banyak" role="tabpanel" aria-labelledby="tab-banyak" hidden>
+    <form class="card bset" id="bf" autocomplete="off" onsubmit="return false" novalidate>
+      <div class="bgrid">
+        <fieldset aria-labelledby="bl-tipe">
+          <div class="lh" data-help="tipe" data-hid="b"><span class="l" id="bl-tipe">Tipe penjual</span></div>
+          <div class="seg">
+            <label><input type="radio" name="btipe" value="nonstar" checked><span>Non-Star</span></label>
+            <label><input type="radio" name="btipe" value="star"><span>Star / Star+</span></label>
+            <label><input type="radio" name="btipe" value="mall"><span>Shopee Mall</span></label>
+          </div>
+        </fieldset>
+        <fieldset aria-labelledby="bl-mode">
+          <div class="lh" data-help="mode" data-hid="b"><span class="l" id="bl-mode">Mode hitung</span></div>
+          <div class="seg">
+            <label><input type="radio" name="bmode" value="laba" checked><span>Hitung laba</span></label>
+            <label><input type="radio" name="bmode" value="harga"><span>Cari harga jual</span></label>
+          </div>
+          <div id="b-targetBox" hidden style="margin-top:.7rem"><div class="lh"><label class="l" for="b-target">Target margin laba (%)<span class="req" aria-hidden="true">*</span></label></div><input type="text" id="b-target" inputmode="decimal" value="20" aria-required="true" aria-describedby="b-etarget"><p class="fmsg" id="b-etarget" hidden></p></div>
+        </fieldset>
+        <div>
+          <div class="lh"><label class="l" for="b-jadwal">Jadwal tarif XTRA</label></div>
+          <select id="b-jadwal"><option value="n">Tarif berlaku sekarang</option><option value="d">Tarif mulai 1 Des 2026</option></select>
+        </div>
+      </div>
+      <fieldset aria-labelledby="bl-prog">
+        <div class="lh" data-help="program" data-hid="b"><span class="l" id="bl-prog">Program &amp; biaya untuk semua baris</span></div>
+        <div class="bprog">
+          <label class="chk"><input type="checkbox" id="b-xtra"><span>Gratis Ongkir XTRA</span></label>
+          <label class="chk"><input type="checkbox" id="b-live"><span>Live XTRA</span></label>
+          <label class="chk"><input type="checkbox" id="b-video"><span>Video XTRA</span></label>
+          <label class="chk"><input type="checkbox" id="b-pre"><span>Pre-Order (3%)</span></label>
+          <label class="chk"><input type="checkbox" id="b-umk"><span>Insentif UMK (admin 50%)</span></label>
+          <select id="b-promo" aria-label="Program Promo XTRA"><option value="">Promo XTRA: tidak ikut</option><option value="x">Promo XTRA 4,5%</option><option value="xp">Promo XTRA+ 6,5%</option></select>
+          <select id="b-spay" aria-label="SPayLater XTRA"><option value="">SPayLater: tidak dipakai</option><option value="3">SPayLater 3 bulan (2,5%)</option><option value="6">SPayLater 6 bulan (4%)</option></select>
+        </div>
+      </fieldset>
+    </form>
+
+    <div class="card">
+      <div class="lh hd" data-help="banyak" data-name="Daftar produk"><h2 id="bcap">Daftar produk</h2></div>
+      <div class="btools">
+        <button type="button" class="btn sm" id="b-add">+ Tambah baris</button>
+        <button type="button" class="btn sm ghost" command="show-modal" commandfor="pdlg">Tempel / impor</button>
+        <button type="button" class="btn sm ghost" id="b-clear">Kosongkan</button>
+        <span class="bmsg" id="bmsg" role="status" aria-live="polite"></span>
+      </div>
+      <div class="bsum" id="bsum" aria-live="polite"></div>
+      <div class="table-wrapper" role="region" tabindex="0" aria-labelledby="bcap">
+        <table id="bt">
+          <thead><tr>
+            <th scope="col">Nama / SKU</th><th scope="col">Kategori<span class="req" aria-hidden="true">*</span></th><th scope="col">Ukuran XTRA</th>
+            <th scope="col" id="bth-harga">Harga asli<span class="req" aria-hidden="true">*</span></th><th scope="col">Diskon %</th><th scope="col">Modal<span class="req" aria-hidden="true">*</span></th><th scope="col">Jumlah</th>
+            <th scope="col">Laba / unit</th><th scope="col">Margin</th><th scope="col">Laba total</th><th scope="col">Catatan</th><th scope="col"><span class="sr">Aksi</span></th>
+          </tr></thead>
+          <tbody id="brows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <dialog id="cdlg" aria-labelledby="cdlg-t" closedby="any">
+      <form method="dialog" class="dhead"><h2 id="cdlg-t">Pilih kategori</h2><button class="x" value="cancel" aria-label="Tutup">✕</button></form>
+      <input type="search" id="cq" autofocus aria-label="Cari kategori" placeholder="Ketik, mis. hijab, earphone, skincare">
+      <p class="hint" id="cstat" aria-live="polite"></p>
+      <ul class="results inline" id="cres" aria-label="Hasil pencarian kategori"></ul>
+    </dialog>
+
+    <dialog id="pdlg" aria-labelledby="pdlg-t" closedby="any">
+      <form method="dialog" class="dhead"><h2 id="pdlg-t">Tempel atau impor produk</h2><button class="x" value="cancel" aria-label="Tutup">✕</button></form>
+      <p class="hint">Satu produk per baris, kolom berurutan: <b>Nama, Kategori, Harga asli, Diskon %, Modal, Jumlah</b>. Salin dari Excel atau Sheets lalu tempel, atau pilih berkas CSV. Angka boleh bertitik ribuan (100.000). Kategori dicocokkan otomatis; yang ambigu perlu dipilih manual.</p>
+      <textarea id="ptext" rows="8" autofocus aria-label="Data produk" placeholder="Kaos anak&#9;Pakaian Muslim Anak&#9;100.000&#9;0&#9;60.000&#9;2"></textarea>
+      <div class="drow"><label class="btn sm ghost" for="pfile" style="cursor:pointer">Pilih berkas CSV</label><input type="file" id="pfile" accept=".csv,.tsv,.txt,text/csv,text/plain" class="sr">
+        <span class="spacer"></span><button type="button" class="btn sm" id="pgo">Tambahkan ke tabel</button></div>
+      <p class="fmsg err" id="pmsg" hidden></p>
+    </dialog>
+
+    <dialog id="kdlg" aria-labelledby="kdlg-t" closedby="closerequest">
+      <form method="dialog"><h2 id="kdlg-t">Hapus semua baris?</h2><p class="hint">Daftar produk di browser ini akan dikosongkan.</p>
+        <div class="drow"><span class="spacer"></span><button class="btn sm" value="ok">Hapus semua</button><button class="btn sm ghost" value="cancel" autofocus>Batal</button></div></form>
+    </dialog>
+  </section>
 </main>
 
 <footer><div class="wrap">
@@ -225,12 +374,13 @@ const HELP = {
   promo: "Pilih salah satu: Promo XTRA 4,5% atau Promo XTRA+ 6,5% dari harga setelah diskon, dengan batas maksimum per produk.",
   spay: "Cicilan 0% untuk pembeli, biayanya ditanggung penjual: 2,5% untuk tenor 3 bulan, 4% untuk 6 bulan.",
   sumber: "Memuat sumber data…",
+  banyak: "Satu produk per baris. Tipe penjual dan program di atas berlaku untuk semua baris. Jumlah dipakai hanya untuk total; biaya dihitung per unit dengan 1 produk per pesanan. Daftar tersimpan di browser ini saja.",
   umk: "Diskon 50% biaya administrasi untuk penjual UMK terverifikasi (SAPA UMKM) dengan produk 100% lokal. Tidak berlaku untuk makanan siap saji dan elektronik buatan dalam negeri.",
 };
 document.querySelectorAll("[data-help]").forEach((h) => {
   const k = h.dataset.help, name = (h.dataset.name || h.querySelector("label, .l").textContent).replace(/^\d\.\s*/, "").replace(/\s*\(.*?\)\s*$/, "").trim();
   const b = document.createElement("button"), tip = document.createElement("div");
-  tip.id = "h-" + k; tip.className = "tip"; tip.textContent = HELP[k];
+  tip.id = "h-" + k + (h.dataset.hid ? "-" + h.dataset.hid : ""); tip.className = "tip"; tip.textContent = HELP[k];
   tip.setAttribute("popover", "hint"); tip.setAttribute("role", "tooltip");
   b.type = "button"; b.className = "help"; b.textContent = "?";
   b.setAttribute("interestfor", tip.id); b.setAttribute("popovertarget", tip.id); b.setAttribute("popovertargetaction", "show");
@@ -409,6 +559,22 @@ for (const id of ["harga", "modal", "order"]) $(id).addEventListener("blur", (e)
 $("f").addEventListener("input", (e) => { if (e.target.id !== "q") render(); });
 $("f").addEventListener("change", () => { refreshXtra(); render(); });
 refreshXtra(); render();
+
+/* ---------- tab: satu produk | banyak produk ---------- */
+let batchLoaded = false;
+const VIEWS = ["satu", "banyak"];
+function show(v) {
+  for (const t of VIEWS) { $("tab-" + t).setAttribute("aria-selected", String(t === v)); $("tab-" + t).tabIndex = t === v ? 0 : -1; $("v-" + t).hidden = t !== v; }
+  document.body.dataset.view = v;
+  if (v === "banyak" && !batchLoaded) { batchLoaded = true; import("/js/shopee-batch.js").then((m) => m.initBatch(D)); }
+}
+VIEWS.forEach((t) => $("tab-" + t).addEventListener("click", () => { location.hash = t; }));
+$("tab-satu").parentElement.addEventListener("keydown", (e) => {
+  const i = VIEWS.findIndex((t) => $("tab-" + t).getAttribute("aria-selected") === "true");
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") { const n = VIEWS[(i + (e.key === "ArrowRight" ? 1 : VIEWS.length - 1)) % VIEWS.length]; location.hash = n; $("tab-" + n).focus(); }
+});
+const fromHash = () => show(location.hash === "#banyak" ? "banyak" : "satu");
+addEventListener("hashchange", fromHash); fromHash();
 </script>
 </body>
 </html>
