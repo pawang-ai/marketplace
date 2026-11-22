@@ -1,0 +1,32 @@
+{
+ "marketplaces": {
+  "shopee": {
+   "nama": "Shopee",
+   "diambil": "2026-11-20",
+   "tarifPer": "2026-11-16",
+   "xtraPer": "2026-11-16",
+   "sumber": [
+    {
+     "label": "Rincian biaya per kategori",
+     "url": "https://seller.shopee.co.id/edu/article/15965"
+    },
+    {
+     "label": "Gratis Ongkir XTRA",
+     "url": "https://seller.shopee.co.id/edu/article/7216"
+    },
+    {
+     "label": "Ringkasan biaya penjual",
+     "url": "https://seller.shopee.co.id/edu/article/3489"
+    },
+    {
+     "label": "Biaya proses pesanan",
+     "url": "https://seller.shopee.co.id/edu/article/25787"
+    },
+    {
+     "label": "Insentif UMK",
+     "url": "https://seller.shopee.co.id/edu/article/28672"
+    }
+   ]
+  }
+ }
+}
