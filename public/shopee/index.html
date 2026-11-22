@@ -91,6 +91,9 @@ tr.t th, tr.t td { font-weight: 700; }
 .bprog select { padding: .5rem .7rem; font-size: .9rem; }
 .btools { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1rem; }
 .bmsg { font-size: .85rem; color: var(--muted); }
+.btools .lh { margin: 0; }
+.btools select { width: auto; padding: .5rem .7rem; font-size: .88rem; }
+.print-only { display: none; }
 .bsum { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem; margin-bottom: 1rem; }
 .bsum div { padding: .7rem .9rem; border-radius: 12px; background: light-dark(#fff1de, #1e2633); }
 .bsum dt, .bsum small { font-size: .75rem; color: var(--muted); display: block; }
@@ -138,6 +141,21 @@ dialog textarea { width: 100%; font: .85rem ui-monospace, Menlo, monospace; colo
   #bt td::before { content: attr(data-label); font-size: .78rem; font-weight: 600; color: var(--muted); }
   #bt td.num { text-align: left; padding-top: .4rem; }
   .katbtn { min-width: 0; }
+}
+
+@media print {
+  @page { size: landscape; margin: 1cm; }
+  header, footer, .top, .tabs, #v-satu, .bset, .btools, dialog, .acts, #bt thead th:last-child, #bt td:last-child { display: none !important; }
+  body { background: #fff; color: #000; }
+  .print-only { display: block; font-size: 10pt; margin-bottom: .6rem; }
+  .card { box-shadow: none; padding: 0; background: none; }
+  .table-wrapper { overflow: visible; max-block-size: none; box-shadow: none; }
+  #bt { min-width: 0; font-size: 8.5pt; }
+  #bt th, #bt td { background: none; position: static; padding: .2rem .3rem; }
+  #bt input, #bt select, .katbtn { box-shadow: none !important; background: none; padding: 0; appearance: none; color: #000; white-space: normal; min-width: 0 !important; }
+  #bt tr { break-inside: avoid; }
+  .bsum div { background: none; box-shadow: inset 0 0 0 1px #999; }
+  .req { display: none; }
 }
 
 @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } .res { position: static; } .row { grid-template-columns: 1fr; } .top img { width: 80px; } }
@@ -312,6 +330,14 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
         <button type="button" class="btn sm ghost" id="b-clear">Kosongkan</button>
         <span class="bmsg" id="bmsg" role="status" aria-live="polite"></span>
       </div>
+      <div class="btools bexp">
+        <span class="lh" data-help="ekspor" data-name="Ekspor"><span class="l">Ekspor</span></span>
+        <select id="b-fmt" aria-label="Format angka ekspor"><option value="id">Excel Indonesia (; dan koma)</option><option value="intl">Internasional (, dan titik)</option></select>
+        <button type="button" class="btn sm ghost" id="b-copy">Salin</button>
+        <button type="button" class="btn sm ghost" id="b-csv">Unduh CSV</button>
+        <button type="button" class="btn sm ghost" id="b-print">Cetak / PDF</button>
+      </div>
+      <p class="print-only" id="bprint"></p>
       <div class="bsum" id="bsum" aria-live="polite"></div>
       <div class="table-wrapper" role="region" tabindex="0" aria-labelledby="bcap">
         <table id="bt">
@@ -374,6 +400,7 @@ const HELP = {
   promo: "Pilih salah satu: Promo XTRA 4,5% atau Promo XTRA+ 6,5% dari harga setelah diskon, dengan batas maksimum per produk.",
   spay: "Cicilan 0% untuk pembeli, biayanya ditanggung penjual: 2,5% untuk tenor 3 bulan, 4% untuk 6 bulan.",
   sumber: "Memuat sumber data…",
+  ekspor: "Salin: tempel langsung ke Sheets atau Excel (kolom dipisah tab). Unduh CSV: Excel Indonesia memakai titik koma dan koma desimal, Internasional memakai koma dan titik desimal. Hanya baris lengkap yang berisi angka; baris TOTAL ada di akhir. Rupiah dibulatkan.",
   banyak: "Satu produk per baris. Tipe penjual dan program di atas berlaku untuk semua baris. Jumlah dipakai hanya untuk total; biaya dihitung per unit dengan 1 produk per pesanan. Daftar tersimpan di browser ini saja.",
   umk: "Diskon 50% biaya administrasi untuk penjual UMK terverifikasi (SAPA UMKM) dengan produk 100% lokal. Tidak berlaku untuk makanan siap saji dan elektronik buatan dalam negeri.",
 };

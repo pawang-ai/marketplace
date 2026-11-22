@@ -1,6 +1,7 @@
 /** Tabel banyak produk: satu tipe penjual & program untuk semua baris, hitung per baris. */
 import { rp, pc, fees, solve, remapEntry, searchCategories, xtraVariant } from "/js/shopee-calc.js";
 import { parseNum, parseTable, matchCategory, rowsFromTable } from "/js/shopee-import.js";
+import { buildTable, toDelimited, FORMATS, TIPE } from "/js/shopee-export.js";
 
 const KEY = "mp.shopee.batch.v1", MAX_ROWS = 200;
 const $ = (id) => document.getElementById(id);
@@ -176,6 +177,27 @@ export function initBatch(D) {
   /* Invoker Commands: tanpa dukungan native, buka dialog lewat klik biasa */
   if (!("commandForElement" in HTMLButtonElement.prototype)) document.querySelectorAll("[commandfor]").forEach((b) => b.addEventListener("click", () => $(b.getAttribute("commandfor")).showModal()));
 
+
+  /* ---------- ekspor ---------- */
+  const table = () => buildTable(rows.map((r) => ({ n: r.n, entry: r.entry, uk: r.uk, harga: num(r.harga) || 0, diskon: num(r.diskon) || 0, qty: num(r.qty) || 0, modal: num(r.modal) || 0, calc: r.calc, notes: (r.calc?.issues ?? []).map((i) => i.m) })), S);
+  const text = (delim) => toDelimited(table(), delim, FORMATS[$("b-fmt").value].decimal);
+  const done = () => rows.filter((r) => r.calc?.ok).length;
+  $("b-copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(text("\t")); say(`Tersalin: ${rows.length} baris (${done()} lengkap). Tempel di Sheets atau Excel.`); }
+    catch { say("Tidak bisa menyalin di browser ini. Gunakan Unduh CSV."); }
+  });
+  $("b-csv").addEventListener("click", () => {
+    const url = URL.createObjectURL(new Blob(["\uFEFF" + text(FORMATS[$("b-fmt").value].delim)], { type: "text/csv;charset=utf-8" }));
+    const a = el("a", { href: url, download: `kalkulator-shopee-${new Date().toISOString().slice(0, 10)}.csv` });
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    say(`CSV diunduh: ${rows.length} baris (${done()} lengkap).`);
+  });
+  $("b-print").addEventListener("click", () => {
+    const on = (b) => (b ? "ya" : "tidak");
+    $("bprint").textContent = `Kalkulator biaya Shopee, ${new Date().toLocaleDateString("id-ID", { dateStyle: "long" })}. ${TIPE[S.tipe]}. Mode: ${S.mode === "harga" ? `harga jual minimal (target margin ${S.target}%)` : "hitung laba"}. XTRA: ${on(S.xtra)}${S.xtra ? ` (tarif ${S.jadwal === "d" ? "mendatang" : "saat ini"})` : ""}, Promo: ${S.promo || "tidak"}, Live: ${on(S.live)}, Video: ${on(S.video)}, SPayLater: ${S.spay ? S.spay + " bln" : "tidak"}, Pre-Order: ${on(S.pre)}, UMK: ${on(S.umk)}.`;
+    print();
+  });
+
   /* ---------- toolbar ---------- */
   $("b-add").addEventListener("click", () => addRow()?.el.n.focus());
   $("b-clear").addEventListener("click", () => $("kdlg").showModal());
@@ -196,11 +218,13 @@ export function initBatch(D) {
   });
   $("b-target").addEventListener("input", () => { S = readSettings(); const bad = $("b-target").value.trim() === "" || !(num(S.target) >= 0 && num(S.target) < 100); $("b-etarget").hidden = !bad; $("b-etarget").className = "fmsg err"; $("b-etarget").textContent = bad ? "Isi target margin antara 0 dan di bawah 100." : ""; $("b-target").toggleAttribute("aria-invalid", bad); refreshAll(); });
 
+  $("b-fmt").addEventListener("change", save);
+
   /* ---------- simpan di browser ---------- */
   function save() {
     clearTimeout(saveT);
     saveT = setTimeout(() => {
-      try { localStorage.setItem(KEY, JSON.stringify({ v: 1, S, rows: rows.map((r) => ({ n: r.n, c: r.entry && { k: r.entry.k, s: r.entry.s, j: r.entry.j.split(/;\s*/)[0] }, vi: r.vi, uk: r.uk, harga: r.harga, diskon: r.diskon, modal: r.modal, qty: r.qty })) })); } catch { /* penyimpanan penuh/diblokir: abaikan */ }
+      try { localStorage.setItem(KEY, JSON.stringify({ v: 1, S, fmt: $("b-fmt").value, rows: rows.map((r) => ({ n: r.n, c: r.entry && { k: r.entry.k, s: r.entry.s, j: r.entry.j.split(/;\s*/)[0] }, vi: r.vi, uk: r.uk, harga: r.harga, diskon: r.diskon, modal: r.modal, qty: r.qty })) })); } catch { /* penyimpanan penuh/diblokir: abaikan */ }
     }, 300);
   }
   function load() {
@@ -211,6 +235,7 @@ export function initBatch(D) {
       for (const [n, v] of Object.entries(set)) { const i = document.querySelector(`[name=${n}][value=${v}]`); if (i) i.checked = true; }
       $("b-target").value = d.S.target; $("b-jadwal").value = d.S.jadwal; $("b-promo").value = d.S.promo; $("b-spay").value = d.S.spay;
       for (const k of ["xtra", "live", "video", "pre", "umk"]) $("b-" + k).checked = !!d.S[k];
+      if (d.fmt in FORMATS) $("b-fmt").value = d.fmt;
       S = readSettings(); $("bf").dispatchEvent(new Event("change"));
       const all = D.kategori[S.tipe === "mall" ? "mall" : "reguler"];
       for (const p of d.rows.slice(0, MAX_ROWS)) {
