@@ -30,6 +30,7 @@ legend, label.l { display: block; font: 700 .9rem "Plus Jakarta Sans", sans-seri
 .seg span { display: block; text-align: center; padding: .6rem .5rem; border-radius: 10px; font-weight: 600; font-size: .92rem; box-shadow: inset 0 0 0 1.5px var(--line); }
 .seg input:checked + span { background: var(--cta-bg); color: var(--cta-ink); box-shadow: none; }
 .seg input:focus-visible + span { outline: 3px solid var(--fire); outline-offset: 2px; }
+input[type=search] { appearance: none; }
 input[type=text], input[type=search], select { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 0; border-radius: 10px; padding: .7rem .85rem; box-shadow: inset 0 0 0 1.5px var(--line); }
 .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
 .row > *, .layout > * { min-width: 0; }
@@ -122,7 +123,7 @@ tr.t th, tr.t td { font-weight: 700; }
 .acts button { width: 2rem; height: 2rem; border: 0; border-radius: 8px; background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1.5px var(--line); cursor: pointer; font-size: .95rem; }
 .acts button:hover { background: light-dark(#fff1de, #1e2633); color: var(--ink); }
 .results.inline { position: static; box-shadow: none; padding: 0; max-height: 50vh; margin-top: .5rem; }
-dialog { width: min(640px, calc(100vw - 2rem)); max-height: 88vh; padding: 1.2rem; border: 0; border-radius: 18px; background: var(--surface); color: var(--ink); box-shadow: 0 24px 60px -16px rgb(0 0 0 / .55); }
+dialog { margin: auto; width: min(640px, calc(100vw - 2rem)); max-height: 88vh; padding: 1.2rem; border: 0; border-radius: 18px; background: var(--surface); color: var(--ink); box-shadow: 0 24px 60px -16px rgb(0 0 0 / .55); }
 dialog:modal { overscroll-behavior: contain; }
 dialog::backdrop { background: rgb(0 0 0 / .5); overflow: hidden; overscroll-behavior: contain; }
 .dhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; }
@@ -131,6 +132,9 @@ dialog::backdrop { background: rgb(0 0 0 / .5); overflow: hidden; overscroll-beh
 dialog textarea { width: 100%; font: .85rem ui-monospace, Menlo, monospace; color: var(--ink); background: var(--bg); border: 0; border-radius: 10px; padding: .7rem; box-shadow: inset 0 0 0 1.5px var(--line); margin-block: .6rem; resize: vertical; }
 .drow { display: flex; gap: .6rem; align-items: center; margin-top: .8rem; flex-wrap: wrap; }
 .spacer { flex: 1; }
+@media (pointer: coarse) {
+  #bt input, #bt select, .katbtn, .bprog select, .btools select, dialog textarea { font-size: 16px; }
+}
 @container (width < 760px) {
   #bt { min-width: 0; }
   #bt, #bt thead, #bt tbody, #bt tr, #bt th, #bt td { display: block; }
@@ -167,7 +171,7 @@ dialog textarea { width: 100%; font: .85rem ui-monospace, Menlo, monospace; colo
 .help { position: relative; flex: none; display: inline-grid; place-items: center; width: 1.3rem; height: 1.3rem; margin-left: .4rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1.5px currentColor; font: 700 .72rem/1 "Plus Jakarta Sans", sans-serif; cursor: help; }
 .help::before { content: ""; position: absolute; inset: -.45rem; }
 .help:hover, .help[aria-expanded="true"] { background: var(--cta-bg); color: var(--cta-ink); box-shadow: none; }
-.tip { margin: 0; max-width: min(20rem, calc(100vw - 2rem)); padding: .7rem .85rem; border: 0; border-radius: 12px; background: light-dark(var(--navy), #f8fafc); color: light-dark(#fff6e9, #0b0e14); font: 400 .85rem/1.5 Inter, sans-serif; box-shadow: 0 10px 28px -10px rgb(0 0 0 / .5); }
+.tip { margin: auto; max-width: min(20rem, calc(100vw - 2rem)); padding: .7rem .85rem; border: 0; border-radius: 12px; background: light-dark(var(--navy), #f8fafc); color: light-dark(#fff6e9, #0b0e14); font: 400 .85rem/1.5 Inter, sans-serif; box-shadow: 0 10px 28px -10px rgb(0 0 0 / .5); }
 @supports (position-area: block-start) {
   .tip { inset: auto; margin: .4rem 0; position-area: block-start; position-try-fallbacks: flip-block, flip-inline; }
 }
@@ -405,7 +409,7 @@ const HELP = {
   umk: "Diskon 50% biaya administrasi untuk penjual UMK terverifikasi (SAPA UMKM) dengan produk 100% lokal. Tidak berlaku untuk makanan siap saji dan elektronik buatan dalam negeri.",
 };
 document.querySelectorAll("[data-help]").forEach((h) => {
-  const k = h.dataset.help, name = (h.dataset.name || h.querySelector("label, .l").textContent).replace(/^\d\.\s*/, "").replace(/\s*\(.*?\)\s*$/, "").trim();
+  const k = h.dataset.help, name = (h.dataset.name || h.querySelector("label, .l").textContent).replace(/^\d\.\s*/, "").replace(/\*+$/, "").replace(/\s*\(.*?\)\s*$/, "").trim();
   const b = document.createElement("button"), tip = document.createElement("div");
   tip.id = "h-" + k + (h.dataset.hid ? "-" + h.dataset.hid : ""); tip.className = "tip"; tip.textContent = HELP[k];
   tip.setAttribute("popover", "hint"); tip.setAttribute("role", "tooltip");
@@ -424,7 +428,7 @@ if (probe.popover !== "hint") { /* tanpa popover=hint: toggletip jadi auto agar 
 }
 if (!("interestForElement" in HTMLButtonElement.prototype)) { /* hover & fokus untuk browser tanpa Interest Invokers */
   let t; const tipOf = (n) => $(n.getAttribute("popovertarget"));
-  const open = (b) => { clearTimeout(t); const p = tipOf(b); if (!p.matches(":popover-open")) p.showPopover(); };
+  const open = (b) => { clearTimeout(t); const p = tipOf(b); if (!p.matches(":popover-open")) p.showPopover({ source: b }); };
   const close = (b) => { clearTimeout(t); t = setTimeout(() => { const p = tipOf(b); if (p.matches(":popover-open") && !p.matches(":hover") && !b.matches(":hover")) p.hidePopover(); }, 200); };
   document.querySelectorAll(".help").forEach((b) => {
     const p = tipOf(b);

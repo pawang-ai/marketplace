@@ -198,6 +198,14 @@ export function initBatch(D) {
     print();
   });
 
+  /* closedby="any" belum ada di semua browser: tutup dialog saat klik di luar kotaknya */
+  if (!("closedBy" in HTMLDialogElement.prototype)) {
+    for (const id of ["cdlg", "pdlg"]) {
+      const d = $(id);
+      d.addEventListener("click", (e) => { const r = d.getBoundingClientRect(); if (e.target === d && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) d.close(); });
+    }
+  }
+
   /* ---------- toolbar ---------- */
   $("b-add").addEventListener("click", () => addRow()?.el.n.focus());
   $("b-clear").addEventListener("click", () => $("kdlg").showModal());
