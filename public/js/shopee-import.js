@@ -47,12 +47,12 @@ export function matchCategory(D, tipe, text) {
 }
 
 /**
- * Kolom: Nama, Kategori, Harga asli, Diskon %, Modal, Jumlah. Baris judul dilewati otomatis.
- * @returns {{n: string, kat: string, harga: string, diskon: string, modal: string, qty: string}[]}
+ * Kolom: Nama, Kategori, Harga asli, Diskon %, Modal, Jumlah, Pesanan (opsional). Baris judul dilewati otomatis.
+ * @returns {{n: string, kat: string, harga: string, diskon: string, modal: string, qty: string, order: string}[]}
  */
 export function rowsFromTable(table) {
   const rows = table.filter((r) => r.length > 1);
   if (rows.length && Number.isNaN(parseNum(rows[0][2]))) rows.shift();
   const f = (x) => (Number.isNaN(parseNum(x)) ? "" : String(parseNum(x)));
-  return rows.map((r) => ({ n: r[0] ?? "", kat: r[1] ?? "", harga: f(r[2]), diskon: f(r[3]), modal: f(r[4]), qty: f(r[5]) || "1" }));
+  return rows.map((r) => ({ n: r[0] ?? "", kat: r[1] ?? "", harga: f(r[2]), diskon: f(r[3]), modal: f(r[4]), qty: f(r[5]) || "1", order: r[6] ?? "" }));
 }

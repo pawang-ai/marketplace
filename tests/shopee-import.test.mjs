@@ -32,9 +32,14 @@ test("matchCategory: tepat satu cocok, ambigu, dan tidak ada", () => {
   assert.deepEqual(matchCategory(D, "nonstar", "zzzz tidak ada"), { entry: null, n: 0 });
 });
 
+test("rowsFromTable membaca kolom Pesanan opsional", () => {
+  const r = rowsFromTable(parseTable("Kaos\tPakaian Muslim Anak\t100.000\t0\t60.000\t1\tP1\nTopi\tTopi\t50000\t0\t20000\t2\tP1"));
+  assert.deepEqual(r.map((x) => x.order), ["P1", "P1"]);
+});
+
 test("rowsFromTable melewati judul dan menormalkan angka", () => {
   const r = rowsFromTable(parseTable("Nama;Kategori;Harga;Diskon;Modal;Jumlah\nKaos;Pakaian Muslim Anak;100.000;10;60.000;3\nTopi;Topi;50000;;20000;"));
   assert.equal(r.length, 2);
-  assert.deepEqual(r[0], { n: "Kaos", kat: "Pakaian Muslim Anak", harga: "100000", diskon: "10", modal: "60000", qty: "3" });
+  assert.deepEqual(r[0], { n: "Kaos", kat: "Pakaian Muslim Anak", harga: "100000", diskon: "10", modal: "60000", qty: "3", order: "" });
   assert.equal(r[1].qty, "1"); assert.equal(r[1].diskon, "");
 });
