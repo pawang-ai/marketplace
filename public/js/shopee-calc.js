@@ -88,3 +88,18 @@ export function searchCategories(D, tipe, query, limit = 8) {
     .sort((a, b) => t.filter((w) => b.n.includes(w)).length - t.filter((w) => a.n.includes(w)).length)
     .slice(0, limit).map((x) => x.e);
 }
+
+/** Kunci kode pesanan: tanpa spasi tepi dan huruf besar/kecil diabaikan. Kosong = tanpa pesanan campuran. */
+export const orderKey = (text) => String(text ?? "").trim().toLowerCase();
+
+/**
+ * Total nilai tiap pesanan campuran (jumlah nilai baris yang berkode sama).
+ * Dipakai sebagai `Opts.order` sehingga biaya proses pesanan dibagi proporsional.
+ * @param {{key: string, value: number}[]} lines value = harga setelah diskon x jumlah; baris tak valid bernilai 0
+ * @returns {Map<string, number>}
+ */
+export function orderTotals(lines) {
+  const m = new Map();
+  for (const { key, value } of lines) { const k = orderKey(key); if (k && value > 0) m.set(k, (m.get(k) ?? 0) + value); }
+  return m;
+}

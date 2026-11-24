@@ -101,7 +101,7 @@ tr.t th, tr.t td { font-weight: 700; }
 .bsum b { font: 800 1.05rem "Plus Jakarta Sans", sans-serif; font-variant-numeric: tabular-nums; }
 .bsum .neg { color: light-dark(#b42318, #f87171); }
 .table-wrapper { overflow: auto; max-inline-size: 100%; max-block-size: min(640px, 75vh); container-type: inline-size; border-radius: 12px; box-shadow: 0 0 0 1px var(--line); }
-#bt { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1120px; font-size: .88rem; }
+#bt { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1240px; font-size: .88rem; }
 #bt thead { position: sticky; inset-block-start: 0; z-index: 2; }
 #bt th, #bt td { padding: .4rem .5rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); background: var(--surface); }
 #bt thead th { font: 700 .78rem "Plus Jakarta Sans", sans-serif; white-space: nowrap; color: var(--muted); }
@@ -114,6 +114,8 @@ tr.t th, tr.t td { font-weight: 700; }
 #bt input[data-warn] { box-shadow: inset 0 0 0 2px light-dark(#b45309, #facc15); }
 #bt input.m { min-width: 7.5rem; }
 #bt td:nth-child(5) input, #bt td:nth-child(7) input { min-width: 4.5rem; }
+#bt td:nth-child(8) input { min-width: 5.5rem; }
+#bt th .lh { margin: 0; flex-wrap: nowrap; } #bt th .lh .l { font: inherit; color: inherit; }
 #bt td:nth-child(3) select { min-width: 6rem; }
 .katbtn { text-align: left; cursor: pointer; min-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .katbtn:empty::before { content: "Pilih kategori"; color: var(--muted); }
@@ -347,7 +349,7 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
         <table id="bt">
           <thead><tr>
             <th scope="col">Nama / SKU</th><th scope="col">Kategori<span class="req" aria-hidden="true">*</span></th><th scope="col">Ukuran XTRA</th>
-            <th scope="col" id="bth-harga">Harga asli<span class="req" aria-hidden="true">*</span></th><th scope="col">Diskon %</th><th scope="col">Modal<span class="req" aria-hidden="true">*</span></th><th scope="col">Jumlah</th>
+            <th scope="col" id="bth-harga">Harga asli<span class="req" aria-hidden="true">*</span></th><th scope="col">Diskon %</th><th scope="col">Modal<span class="req" aria-hidden="true">*</span></th><th scope="col">Jumlah</th><th scope="col"><span class="lh" data-help="pesanan" data-name="Kode pesanan"><span class="l">Pesanan</span></span></th>
             <th scope="col">Laba / unit</th><th scope="col">Margin</th><th scope="col">Laba total</th><th scope="col">Catatan</th><th scope="col"><span class="sr">Aksi</span></th>
           </tr></thead>
           <tbody id="brows"></tbody>
@@ -364,7 +366,7 @@ input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px light-dark(#b42318, #f8
 
     <dialog id="pdlg" aria-labelledby="pdlg-t" closedby="any">
       <form method="dialog" class="dhead"><h2 id="pdlg-t">Tempel atau impor produk</h2><button class="x" value="cancel" aria-label="Tutup">✕</button></form>
-      <p class="hint">Satu produk per baris, kolom berurutan: <b>Nama, Kategori, Harga asli, Diskon %, Modal, Jumlah</b>. Salin dari Excel atau Sheets lalu tempel, atau pilih berkas CSV. Angka boleh bertitik ribuan (100.000). Kategori dicocokkan otomatis; yang ambigu perlu dipilih manual.</p>
+      <p class="hint">Satu produk per baris, kolom berurutan: <b>Nama, Kategori, Harga asli, Diskon %, Modal, Jumlah</b>, dan (opsional) <b>Pesanan</b> untuk menggabungkan beberapa produk dalam satu pesanan. Salin dari Excel atau Sheets lalu tempel, atau pilih berkas CSV. Angka boleh bertitik ribuan (100.000). Kategori dicocokkan otomatis; yang ambigu perlu dipilih manual.</p>
       <textarea id="ptext" rows="8" autofocus aria-label="Data produk" placeholder="Kaos anak&#9;Pakaian Muslim Anak&#9;100.000&#9;0&#9;60.000&#9;2"></textarea>
       <div class="drow"><label class="btn sm ghost" for="pfile" style="cursor:pointer">Pilih berkas CSV</label><input type="file" id="pfile" accept=".csv,.tsv,.txt,text/csv,text/plain" class="sr">
         <span class="spacer"></span><button type="button" class="btn sm" id="pgo">Tambahkan ke tabel</button></div>
@@ -405,6 +407,7 @@ const HELP = {
   spay: "Cicilan 0% untuk pembeli, biayanya ditanggung penjual: 2,5% untuk tenor 3 bulan, 4% untuk 6 bulan.",
   sumber: "Memuat sumber data…",
   ekspor: "Salin: tempel langsung ke Sheets atau Excel (kolom dipisah tab). Unduh CSV: Excel Indonesia memakai titik koma dan koma desimal, Internasional memakai koma dan titik desimal. Hanya baris lengkap yang berisi angka; baris TOTAL ada di akhir. Rupiah dibulatkan.",
+  pesanan: "Opsional. Baris dengan kode pesanan yang sama dianggap satu pesanan: biaya proses Rp1.250 dibagi sesuai porsi nilai tiap baris (harga setelah diskon x jumlah). Kosong = tiap unit dihitung sebagai pesanan sendiri. Hanya berlaku di mode Hitung laba.",
   banyak: "Satu produk per baris. Tipe penjual dan program di atas berlaku untuk semua baris. Jumlah dipakai hanya untuk total; biaya dihitung per unit dengan 1 produk per pesanan. Daftar tersimpan di browser ini saja.",
   umk: "Diskon 50% biaya administrasi untuk penjual UMK terverifikasi (SAPA UMKM) dengan produk 100% lokal. Tidak berlaku untuk makanan siap saji dan elektronik buatan dalam negeri.",
 };

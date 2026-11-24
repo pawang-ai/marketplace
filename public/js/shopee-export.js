@@ -10,19 +10,19 @@ export const TIPE = { nonstar: "Non-Star", star: "Star/Star+", mall: "Shopee Mal
 export const FORMATS = { id: { delim: ";", decimal: "," }, intl: { delim: ",", decimal: "." } };
 
 /**
- * @param {{n: string, entry: any, uk: string, harga: number, diskon: number, qty: number, modal: number, calc: any, notes: string[]}[]} items
+ * @param {{n: string, order?: string, entry: any, uk: string, harga: number, diskon: number, qty: number, modal: number, calc: any, notes: string[]}[]} items
  * @param {{tipe: string, xtra: boolean}} S
  * @returns {{head: string[], rows: (string|number)[][]}} baris terakhir = TOTAL
  */
 export function buildTable(items, S) {
-  const head = ["Nama / SKU", "Kategori", "Sub kategori", "Tipe penjual", "Ukuran XTRA", "Harga asli", "Diskon %", "Harga setelah diskon", "Modal", "Jumlah",
+  const head = ["Nama / SKU", "Kategori", "Sub kategori", "Tipe penjual", "Ukuran XTRA", "Harga asli", "Diskon %", "Harga setelah diskon", "Modal", "Jumlah", "Pesanan",
     ...COMPONENTS.map(([, l]) => l + " /unit"), "Total biaya /unit", "Dana diterima /unit", "Laba /unit", "Margin %", "Omzet total", "Biaya total", "Laba total", "Catatan"];
   const tot = { qty: 0, omzet: 0, biaya: 0, laba: 0 };
   const rows = items.map((it) => {
     const c = it.calc, ok = c?.ok, f = c?.f, q = ok ? c.qty : 0;
     if (ok) { tot.qty += q; tot.omzet += f.base * q; tot.biaya += f.total * q; tot.laba += c.profit * q; }
     return [it.n, it.entry?.k ?? "", it.entry?.s ?? "", TIPE[S.tipe] ?? S.tipe, S.xtra ? (it.uk === "x" ? "Khusus" : "Biasa") : "-",
-      ok ? c.price : "", it.diskon, ok ? f.base : "", ok ? c.modal : "", ok ? q : "",
+      ok ? c.price : "", it.diskon, ok ? f.base : "", ok ? c.modal : "", ok ? q : "", it.order ?? "",
       ...COMPONENTS.map(([k]) => (ok ? f.L.find((x) => x.k === k)?.v ?? 0 : "")),
       ok ? f.total : "", ok ? f.net : "", ok ? c.profit : "", ok ? c.margin : "", ok ? f.base * q : "", ok ? f.total * q : "", ok ? c.profit * q : "", (it.notes ?? []).join(" | ")];
   });

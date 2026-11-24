@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { fees, solve, remapEntry, searchCategories } from "../public/js/shopee-calc.js";
+import { fees, solve, remapEntry, searchCategories, orderKey, orderTotals } from "../public/js/shopee-calc.js";
 
 const D = JSON.parse(readFileSync(new URL("../public/data/shopee.json", import.meta.url)));
 const find = (set, k, s) => D.kategori[set].find((e) => e.k === k && e.s === s);
@@ -68,4 +68,22 @@ test("solve: target mustahil mengembalikan null", () => assert.equal(solve(D, an
 test("remapEntry memetakan kategori ke set Mall; pencarian menemukan hijab", () => {
   assert.equal(remapEntry(D, anak, "mall").a, 9.95);
   assert.ok(searchCategories(D, "nonstar", "hijab").length > 0);
+});
+
+test("orderTotals menjumlah nilai per kode pesanan, mengabaikan kode kosong dan nilai 0", () => {
+  const t = orderTotals([{ key: "P1", value: 100000 }, { key: " p1 ", value: 100000 }, { key: "", value: 5000 }, { key: "P2", value: 0 }]);
+  assert.equal(t.get("p1"), 200000); assert.equal(t.has("p2"), false); assert.equal(t.size, 1);
+  assert.equal(orderKey("  AbC "), "abc");
+});
+
+test("pesanan campuran: biaya proses Rp1.250 terbagi tepat antar baris", () => {
+  const rows = [{ base: 100000, qty: 1 }, { base: 50000, qty: 2 }], V = rows.reduce((s, r) => s + r.base * r.qty, 0);
+  const proses = rows.map((r) => line(fees(D, anak, o({ order: V }), r.base), "proses"));
+  assert.equal(proses[0], 625); assert.equal(proses[1], 312.5);
+  assert.equal(proses.reduce((s, p, i) => s + p * rows[i].qty, 0), 1250);
+});
+
+test("pesanan campuran: satu baris berjumlah 3 dalam satu pesanan membayar Rp1.250 sekali", () => {
+  const V = 100000 * 3;
+  assert.ok(Math.abs(line(fees(D, anak, o({ order: V }), 100000), "proses") * 3 - 1250) < 1e-9);
 });

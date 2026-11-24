@@ -22,6 +22,11 @@ test("buildTable: kolom komponen, baris tidak lengkap kosong, baris TOTAL", () =
   assert.equal(total[c("Margin %")], 23);
 });
 
+test("buildTable: kolom Pesanan terisi", () => {
+  const t = buildTable([{ ...items[0], order: "P1" }], S);
+  assert.equal(t.rows[0][t.head.indexOf("Pesanan")], "P1");
+});
+
 test("toDelimited: preset Indonesia (; dan koma) dan sel ber-kutip", () => {
   const out = toDelimited(buildTable(items, S), FORMATS.id.delim, FORMATS.id.decimal), lines = out.trim().split("\r\n");
   assert.equal(lines.length, 4);

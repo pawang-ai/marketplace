@@ -1,5 +1,5 @@
 /** Tabel banyak produk: satu tipe penjual & program untuk semua baris, hitung per baris. */
-import { rp, pc, fees, solve, remapEntry, searchCategories, xtraVariant } from "/js/shopee-calc.js";
+import { rp, pc, fees, solve, remapEntry, searchCategories, xtraVariant, orderKey, orderTotals } from "/js/shopee-calc.js";
 import { parseNum, parseTable, matchCategory, rowsFromTable } from "/js/shopee-import.js";
 import { buildTable, toDelimited, FORMATS, TIPE } from "/js/shopee-export.js";
 
@@ -22,11 +22,21 @@ export function initBatch(D) {
       promo: $("b-promo").value, spay: $("b-spay").value,
     };
   }
-  const blank = () => ({ n: "", entry: null, hint: "", vi: 0, uk: "b", harga: "", diskon: "0", modal: "", qty: "1" });
+  const blank = () => ({ n: "", entry: null, hint: "", vi: 0, uk: "b", harga: "", diskon: "0", modal: "", qty: "1", order: "" });
   const optsFor = (r) => ({
     tipe: S.tipe, diskon: num(r.diskon) || 0, order: 0, umk: S.umk, xtra: { on: S.xtra, jadwal: S.jadwal, vi: r.vi, ukuran: r.uk },
     promo: S.promo, live: S.live, video: S.video, spay: S.spay, pre: S.pre,
   });
+
+  /* ---------- pesanan campuran: biaya proses pesanan dibagi per nilai baris ---------- */
+  const lineValue = (r) => {
+    const p = num(r.harga), d = num(r.diskon || "0"), q = num(r.qty || "1");
+    return p > 0 && d >= 0 && d <= 100 && q >= 1 && Number.isInteger(q) ? p * (1 - d / 100) * q : 0;
+  };
+  const inOrder = (r) => orderKey(r.order) !== "";
+  /** Total nilai pesanan baris ini; 0 = hitung per unit (tanpa kode, atau mode harga jual). */
+  const orderValue = (r) => (S.mode === "laba" && inOrder(r) ? orderTotals(rows.map((x) => ({ key: x.order, value: lineValue(x) }))).get(orderKey(r.order)) ?? 0 : 0);
+  const repaintAll = () => { rows.forEach(paint); totals(); };
 
   /* ---------- hitung satu baris ---------- */
   function compute(r) {
@@ -39,10 +49,14 @@ export function initBatch(D) {
     if (Number.isNaN(disc) || disc < 0 || disc > 100) E("d", "Diskon 0 sampai 100%.");
     if (!(qty >= 1) || !Number.isInteger(qty)) E("q", "Jumlah minimal 1, bilangan bulat.");
     if (issues.length) return { issues, ok: false };
-    const o = optsFor(r);
+    const o = optsFor(r); o.order = orderValue(r);
     const price = laba ? num(r.harga) : solve(D, r.entry, o, tg, modal);
     if (price == null) { E("h", "Target margin tidak mungkin dicapai."); return { issues, ok: false }; }
     const f = fees(D, r.entry, o, price), profit = f.net - modal, margin = price > 0 ? profit / price * 100 : 0;
+    if (inOrder(r)) {
+      if (S.mode !== "laba") W("o", "Pesanan campuran hanya berlaku di mode Hitung laba, baris ini dihitung 1 unit per pesanan.");
+      else if (rows.some((x) => orderKey(x.order) === orderKey(r.order) && !lineValue(x))) W("o", "Ada baris lain di pesanan ini yang belum lengkap, porsi biaya dihitung dari baris yang lengkap.");
+    }
     if (S.xtra && !xtraVariant(r.entry, o.xtra)) W("k", "Gratis Ongkir XTRA tidak tersedia untuk kategori atau jadwal ini, tidak dihitung.");
     if (laba && f.base < modal) W("h", "Harga setelah diskon di bawah modal.");
     if (profit < 0) W("m", `Laba minus ${rp(-profit)} per unit.`);
@@ -55,7 +69,7 @@ export function initBatch(D) {
     const c = compute(r), x = r.el;
     r.calc = c;
     const by = {}; for (const i of c.issues) by[i.f] ??= i;
-    for (const [f, node] of [["k", x.kat], ["h", x.harga], ["m", x.modal], ["d", x.diskon], ["q", x.qty]]) {
+    for (const [f, node] of [["k", x.kat], ["h", x.harga], ["m", x.modal], ["d", x.diskon], ["q", x.qty], ["o", x.ord]]) {
       const i = by[f];
       if (i?.level === "err") node.setAttribute("aria-invalid", "true"); else node.removeAttribute("aria-invalid");
       node.toggleAttribute("data-warn", i?.level === "warn");
@@ -101,7 +115,7 @@ export function initBatch(D) {
     const x = r.el = {
       n: inp({ value: r.n, autocomplete: "off" }), kat: el("button", { type: "button", className: "katbtn" }), vsel: el("select", { className: "vsel", hidden: true }),
       uk: el("select"), harga: inp({ inputMode: "numeric", className: "m", value: (r.harga = fmt(r.harga)) }), hargaOut: el("output", { hidden: true }), diskon: inp({ inputMode: "decimal", value: r.diskon }),
-      modal: inp({ inputMode: "numeric", className: "m", value: (r.modal = fmt(r.modal)) }), qty: inp({ inputMode: "numeric", value: r.qty }),
+      modal: inp({ inputMode: "numeric", className: "m", value: (r.modal = fmt(r.modal)) }), qty: inp({ inputMode: "numeric", value: r.qty }), ord: inp({ className: "o", value: r.order, placeholder: "—", maxLength: 24, autocomplete: "off" }),
       laba: el("td", { className: "num" }), margin: el("td", { className: "num" }), total: el("td", { className: "num" }), note: el("td"),
     };
     x.vsel.setAttribute("aria-label", "Jenis produk untuk tarif XTRA");
@@ -111,14 +125,14 @@ export function initBatch(D) {
     const act = (text, label, fn) => { const b = el("button", { type: "button", textContent: text, title: label }); b.addEventListener("click", fn); b.dataset.label = label; return b; };
     x.dup = act("⧉", "Duplikat baris", () => dup(r)); x.del = act("✕", "Hapus baris", () => remove(r));
     const th = el("th", { scope: "row" }, x.n);
-    x.tr = el("tr", {}, th, td("Kategori", x.kat, x.vsel), td("Ukuran XTRA", x.uk), td("Harga asli", x.harga, x.hargaOut), td("Diskon %", x.diskon), td("Modal", x.modal), td("Jumlah", x.qty), x.laba, x.margin, x.total, x.note, el("td", {}, el("div", { className: "acts" }, x.dup, x.del)));
+    x.tr = el("tr", {}, th, td("Kategori", x.kat, x.vsel), td("Ukuran XTRA", x.uk), td("Harga asli", x.harga, x.hargaOut), td("Diskon %", x.diskon), td("Modal", x.modal), td("Jumlah", x.qty), td("Pesanan", x.ord), x.laba, x.margin, x.total, x.note, el("td", {}, el("div", { className: "acts" }, x.dup, x.del)));
     x.laba.dataset.label = "Laba / unit"; x.margin.dataset.label = "Margin"; x.total.dataset.label = "Laba total"; x.note.dataset.label = "Catatan";
     x.harga.setAttribute("aria-required", "true"); x.modal.setAttribute("aria-required", "true");
-    const names = [[x.n, "Nama atau SKU"], [x.kat, "Pilih kategori"], [x.harga, "Harga asli"], [x.diskon, "Diskon persen"], [x.modal, "Modal"], [x.qty, "Jumlah"], [x.dup, "Duplikat"], [x.del, "Hapus"], [x.uk, "Ukuran XTRA"], [x.vsel, "Jenis produk XTRA"]];
+    const names = [[x.n, "Nama atau SKU"], [x.kat, "Pilih kategori"], [x.harga, "Harga asli"], [x.diskon, "Diskon persen"], [x.modal, "Modal"], [x.qty, "Jumlah"], [x.ord, "Kode pesanan"], [x.dup, "Duplikat"], [x.del, "Hapus"], [x.uk, "Ukuran XTRA"], [x.vsel, "Jenis produk XTRA"]];
     r.label = () => names.forEach(([n, t]) => n.setAttribute("aria-label", `${t}, baris ${i()}`));
     x.tr.addEventListener("input", (e) => {
-      const k = new Map([[x.n, "n"], [x.harga, "harga"], [x.diskon, "diskon"], [x.modal, "modal"], [x.qty, "qty"]]).get(e.target);
-      if (k) { r[k] = e.target.value; paint(r); totals(); save(); }
+      const k = new Map([[x.n, "n"], [x.harga, "harga"], [x.diskon, "diskon"], [x.modal, "modal"], [x.qty, "qty"], [x.ord, "order"]]).get(e.target);
+      if (k) { r[k] = e.target.value; if (k === "order" || inOrder(r)) repaintAll(); else { paint(r); totals(); } save(); }
     });
     x.tr.addEventListener("change", (e) => { if (e.target === x.uk) r.uk = x.uk.value; if (e.target === x.vsel) r.vi = +x.vsel.value; if (e.target === x.uk || e.target === x.vsel) update(r); });
     for (const k of ["harga", "modal"]) x[k].addEventListener("blur", () => { money(x[k]); r[k] = x[k].value; paint(r); totals(); save(); });
@@ -129,12 +143,12 @@ export function initBatch(D) {
     if (rows.length >= MAX_ROWS) { say(`Maksimal ${MAX_ROWS} baris.`); return null; }
     const tr = build(r), at = after ? rows.indexOf(after) + 1 : rows.length;
     rows.splice(at, 0, r); const ref = $("brows").children[at]; $("brows").insertBefore(tr, ref ?? null);
-    rows.forEach((x) => x.label()); update(r); return r;
+    rows.forEach((x) => x.label()); update(r); if (inOrder(r)) repaintAll(); return r;
   }
   function dup(r) { const c = { ...r, el: undefined, calc: undefined }; const n = addRow(c, r); n?.el.n.focus(); }
   function remove(r) {
     const i = rows.indexOf(r); r.el.tr.remove(); rows.splice(i, 1);
-    if (!rows.length) addRow(); rows.forEach((x) => x.label()); totals(); save();
+    if (!rows.length) addRow(); rows.forEach((x) => x.label()); repaintAll(); save();
     (rows[Math.min(i, rows.length - 1)].el.n).focus();
   }
   const say = (t) => { $("bmsg").textContent = t; };
@@ -161,10 +175,11 @@ export function initBatch(D) {
     if (rows.length === 1 && !rows[0].n && !rows[0].entry && !rows[0].harga && !rows[0].modal) { rows[0].el.tr.remove(); rows = []; }
     let unmatched = 0, added = 0;
     for (const p of parsed) {
-      const m = matchCategory(D, S.tipe, p.kat), r = { ...blank(), n: p.n, entry: m.entry, harga: p.harga, diskon: p.diskon || "0", modal: p.modal, qty: p.qty };
+      const m = matchCategory(D, S.tipe, p.kat), r = { ...blank(), n: p.n, entry: m.entry, harga: p.harga, diskon: p.diskon || "0", modal: p.modal, qty: p.qty, order: p.order };
       if (!m.entry) { unmatched++; r.hint = m.n ? `${m.n} kecocokan untuk "${p.kat}"` : `"${p.kat}" tidak ditemukan`; }
       if (!addRow(r)) break; added++;
     }
+    repaintAll();
     say(`${added} baris ditambahkan${unmatched ? `, ${unmatched} kategori perlu dipilih manual` : ""}.`);
     return "";
   }
@@ -179,7 +194,7 @@ export function initBatch(D) {
 
 
   /* ---------- ekspor ---------- */
-  const table = () => buildTable(rows.map((r) => ({ n: r.n, entry: r.entry, uk: r.uk, harga: num(r.harga) || 0, diskon: num(r.diskon) || 0, qty: num(r.qty) || 0, modal: num(r.modal) || 0, calc: r.calc, notes: (r.calc?.issues ?? []).map((i) => i.m) })), S);
+  const table = () => buildTable(rows.map((r) => ({ n: r.n, order: r.order.trim(), entry: r.entry, uk: r.uk, harga: num(r.harga) || 0, diskon: num(r.diskon) || 0, qty: num(r.qty) || 0, modal: num(r.modal) || 0, calc: r.calc, notes: (r.calc?.issues ?? []).map((i) => i.m) })), S);
   const text = (delim) => toDelimited(table(), delim, FORMATS[$("b-fmt").value].decimal);
   const done = () => rows.filter((r) => r.calc?.ok).length;
   $("b-copy").addEventListener("click", async () => {
@@ -232,7 +247,7 @@ export function initBatch(D) {
   function save() {
     clearTimeout(saveT);
     saveT = setTimeout(() => {
-      try { localStorage.setItem(KEY, JSON.stringify({ v: 1, S, fmt: $("b-fmt").value, rows: rows.map((r) => ({ n: r.n, c: r.entry && { k: r.entry.k, s: r.entry.s, j: r.entry.j.split(/;\s*/)[0] }, vi: r.vi, uk: r.uk, harga: r.harga, diskon: r.diskon, modal: r.modal, qty: r.qty })) })); } catch { /* penyimpanan penuh/diblokir: abaikan */ }
+      try { localStorage.setItem(KEY, JSON.stringify({ v: 1, S, fmt: $("b-fmt").value, rows: rows.map((r) => ({ n: r.n, o: r.order, c: r.entry && { k: r.entry.k, s: r.entry.s, j: r.entry.j.split(/;\s*/)[0] }, vi: r.vi, uk: r.uk, harga: r.harga, diskon: r.diskon, modal: r.modal, qty: r.qty })) })); } catch { /* penyimpanan penuh/diblokir: abaikan */ }
     }, 300);
   }
   function load() {
@@ -249,7 +264,7 @@ export function initBatch(D) {
       for (const p of d.rows.slice(0, MAX_ROWS)) {
         const cands = p.c ? all.filter((e) => e.k === p.c.k && e.s === p.c.s) : [];
         const entry = cands.find((e) => e.j.includes(p.c.j)) || cands[0] || null;
-        addRow({ ...blank(), n: p.n, entry, vi: p.vi, uk: p.uk, harga: p.harga, diskon: p.diskon, modal: p.modal, qty: p.qty });
+        addRow({ ...blank(), n: p.n, order: p.o ?? "", entry, vi: p.vi, uk: p.uk, harga: p.harga, diskon: p.diskon, modal: p.modal, qty: p.qty });
       }
       return rows.length > 0;
     } catch { return false; }
